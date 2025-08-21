@@ -27,15 +27,20 @@ export {};
 
 declare module "$app/types" {
 	export interface AppTypes {
-		RouteId(): "/";
+		RouteId(): "/" | "/auth" | "/auth/login" | "/auth/signup" | "/ventures" | "/ventures/new";
 		RouteParams(): {
 			
 		};
 		LayoutParams(): {
-			"/": Record<string, never>
+			"/": Record<string, never>;
+			"/auth": Record<string, never>;
+			"/auth/login": Record<string, never>;
+			"/auth/signup": Record<string, never>;
+			"/ventures": Record<string, never>;
+			"/ventures/new": Record<string, never>
 		};
-		Pathname(): "/";
+		Pathname(): "/" | "/auth" | "/auth/" | "/auth/login" | "/auth/login/" | "/auth/signup" | "/auth/signup/" | "/ventures" | "/ventures/" | "/ventures/new" | "/ventures/new/";
 		ResolvedPathname(): `${"" | `/${string}`}${ReturnType<AppTypes['Pathname']>}`;
-		Asset(): "/robots.txt" | string & {};
+		Asset(): "/images/auth_background.jpg" | "/images/default.png" | "/images/hoooklogo.png" | "/robots.txt" | string & {};
 	}
 }

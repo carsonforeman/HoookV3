@@ -1,3 +1,5 @@
-@import 'tailwindcss';
-@plugin '@tailwindcss/forms';
-@plugin '@tailwindcss/typography';
+@import "tailwindcss";
+
+/* optional plugins via the Vite plugin path */
+@plugin "@tailwindcss/forms";
+@plugin "@tailwindcss/typography";

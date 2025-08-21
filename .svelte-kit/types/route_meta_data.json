@@ -1,3 +1,9 @@
 {
-	"/": []
+	"/": [
+		"src/routes/+page.ts"
+	],
+	"/auth": [],
+	"/auth/login": [],
+	"/auth/signup": [],
+	"/ventures/new": []
 }
