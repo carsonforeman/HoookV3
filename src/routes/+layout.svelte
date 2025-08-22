@@ -1,6 +1,7 @@
 <script>
   import "../app.css";
   import Header from "$lib/components/Header.svelte";
+  import Filters from "$lib/components/Filters.svelte";
   import { page } from "$app/stores";
 </script>
 
@@ -8,6 +9,7 @@
   {#if !$page.url.pathname.startsWith("/auth")}
     <!-- Normal pages -->
     <Header />
+	<Filters /> 
     <main class="flex-1 pb-16 sm:pb-0">
       <slot />
     </main>
