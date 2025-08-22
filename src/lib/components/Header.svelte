@@ -1,10 +1,12 @@
 <script>
   import { goto } from '$app/navigation';
+  import { page } from '$app/stores';
   import { user, profile, loadProfile } from '$lib/stores/user';
   import { supabase } from '$lib/supabaseClient';
 
   let search = '';
   let menuOpen = false;
+  let searchOpen = false; // toggle for mobile search
 
   async function handleLogout() {
     await supabase.auth.signOut();
@@ -13,8 +15,8 @@
     goto('/auth/login');
   }
 
-  function openMenu() {
-    if ($profile) menuOpen = true;
+  function toggleMenu() {
+    menuOpen = !menuOpen;
   }
   function closeMenu() {
     menuOpen = false;
@@ -22,6 +24,14 @@
   function go(path) {
     menuOpen = false;
     goto(path);
+  }
+
+  function goHome() {
+    if ($page.url.pathname === '/') {
+      location.reload(); // force refresh
+    } else {
+      goto('/');
+    }
   }
 
   // Display name fallback
@@ -37,64 +47,37 @@
 <header class="p-4 border-b border-gray-200 bg-white">
   <!-- MOBILE layout -->
   <div class="flex flex-col sm:hidden">
-    <!-- Row 1: Logo + Right side (auth/actions) -->
+    <!-- Row: Logo + Search toggle -->
     <div class="flex items-center justify-between">
-      <a href="/" class="flex items-center space-x-2 shrink-0">
-        <img src="/images/hoooklogo.png" alt="Hoook Logo" class="h-8 w-auto" />
-        <span class="sr-only">Hoook</span>
-      </a>
+      {#if searchOpen}
+        <!-- Back button -->
+        <button on:click={() => (searchOpen = false)} class="text-gray-600 pr-2">
+          ←
+        </button>
 
-      <!-- Right side actions -->
-      <div class="flex items-center gap-3">
-        {#if $profile}
-          <!-- New Venture (outline, flips on hover) -->
-          <button
-            on:click={() => goto('/ventures/new')}
-            class="border border-blue-600 text-blue-600 bg-white px-3 py-2 rounded-md
-                   hover:bg-blue-600 hover:text-white hover:border-blue-600
-                   transition-colors duration-200 cursor-pointer"
-            aria-label="Create new venture"
-          >
-            + New Venture
-          </button>
+        <!-- Search bar -->
+        <input
+          type="text"
+          placeholder="Search ventures..."
+          bind:value={search}
+          autofocus
+          class="flex-1 rounded-full border px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      {:else}
+        <!-- Logo -->
+        <a href="/" class="flex items-center space-x-2 shrink-0">
+          <img src="/images/hoooklogo.png" alt="Hoook Logo" class="h-8 w-auto" />
+          <span class="sr-only">Hoook</span>
+        </a>
 
-          <!-- Avatar (bigger), opens menu -->
-          <button
-            class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold text-gray-700 overflow-hidden
-                   hover:ring-2 hover:ring-blue-600 transition"
-            on:click={openMenu}
-            aria-label="Open account menu"
-          >
-            {#if $profile?.avatar_url}
-              <img
-                src="{$profile.avatar_url}"
-                alt="Profile"
-                class="w-10 h-10 rounded-full object-cover"
-                loading="lazy"
-              />
-            {:else}
-              {avatarInitial}
-            {/if}
-          </button>
-        {:else}
-          <button
-            on:click={() => goto('/auth/login')}
-            class="text-gray-700 text-sm font-medium hover:underline shrink-0"
-          >
-            Login
-          </button>
-        {/if}
-      </div>
-    </div>
-
-    <!-- Row 2: Search -->
-    <div class="mt-3">
-      <input
-        type="text"
-        placeholder="Search ventures..."
-        bind:value={search}
-        class="w-full rounded-full border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-      />
+        <!-- Magnifying glass -->
+        <button
+          on:click={() => (searchOpen = true)}
+          class="text-gray-600 hover:text-gray-900"
+        >
+          🔍
+        </button>
+      {/if}
     </div>
   </div>
 
@@ -112,7 +95,7 @@
           type="text"
           placeholder="Search ventures..."
           bind:value={search}
-          class="w-full rounded-full border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="w-full rounded-full border px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
     </div>
@@ -120,21 +103,21 @@
     <!-- Right: Actions -->
     <div class="flex items-center gap-4">
       {#if $profile}
-        <!-- New Venture (outline, flips on hover) -->
+        <!-- New Venture -->
         <button
           on:click={() => goto('/ventures/new')}
-          class="border border-blue-600 text-blue-600 bg-white px-4 py-2 rounded-md
-                 hover:bg-blue-600 hover:text-white hover:border-blue-600
+          class="border border-gray-400 text-gray-700 bg-gray-100 px-4 py-2 rounded-md
+                 hover:bg-gray-200 hover:text-black hover:border-gray-500
                  transition-colors duration-200 cursor-pointer"
         >
           + New Venture
         </button>
 
-        <!-- Avatar (bigger), opens menu -->
+        <!-- Avatar -->
         <button
           class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold text-gray-700 overflow-hidden
                  hover:ring-2 hover:ring-blue-600 transition"
-          on:click={openMenu}
+          on:click={toggleMenu}
           aria-label="Open account menu"
         >
           {#if $profile?.avatar_url}
@@ -229,4 +212,35 @@
       </button>
     </div>
   </aside>
+{/if}
+
+<!-- Bottom Nav (Mobile Only) -->
+{#if $profile}
+  <nav class="sm:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around items-center h-14 z-50">
+    <!-- Home -->
+    <button on:click={goHome} class="flex flex-col items-center text-gray-600 hover:text-gray-900">
+      🏠
+      <span class="text-xs">Home</span>
+    </button>
+
+    <!-- New Venture -->
+    <button
+      on:click={() => goto('/ventures/new')}
+      class="bg-gray-100 text-gray-700 px-4 py-2 rounded-full shadow hover:bg-gray-200 transition"
+    >
+      + New Venture
+    </button>
+
+    <!-- Avatar -->
+    <button on:click={toggleMenu} class="flex flex-col items-center text-gray-600 hover:text-gray-900">
+      {#if $profile?.avatar_url}
+        <img src="{$profile.avatar_url}" alt="Profile" class="w-6 h-6 rounded-full object-cover" />
+      {:else}
+        <span class="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold">
+          {avatarInitial}
+        </span>
+      {/if}
+      <span class="text-xs">You</span>
+    </button>
+  </nav>
 {/if}

@@ -1,7 +1,11 @@
 <script>
   import "../app.css";
   import Header from "$lib/components/Header.svelte";
+  import Filters from "$lib/components/Filters.svelte"; // new filter component
   import { page } from "$app/stores";
+
+  let location = "";
+  let stage = "";
 </script>
 
 <div class="flex flex-col min-h-screen">
@@ -9,13 +13,13 @@
     <!-- Normal pages -->
     <Header />
 
-    <main class="flex-1">
+    <!-- Filters bar (shows on all non-auth pages) -->
+    <Filters bind:location bind:stage />
+
+    <!-- Add pb-16 so content clears the fixed mobile bottom nav -->
+    <main class="flex-1 pb-16 sm:pb-0">
       <slot />
     </main>
-
-    <footer class="p-4 border-t text-center text-gray-500 text-sm">
-      © {new Date().getFullYear()} Hoook
-    </footer>
   {:else}
     <!-- Auth pages get no header/footer -->
     <slot />

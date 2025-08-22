@@ -7,8 +7,10 @@
   let category = "business";
   let type = "";
   let location = "";
+  let stage = "Idea"; // NEW field
   let imageFile: File | null = null;
   let error: string | null = null;
+  let submitting = false;
 
   const states = [
     "Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut",
@@ -21,12 +23,17 @@
     "Wisconsin","Wyoming"
   ];
 
+  const stages = ["Idea", "Starting", "Building", "Growing"];
+
   async function handleSubmit(e: Event) {
     e.preventDefault();
+    if (submitting) return;
+    submitting = true;
     error = null;
 
     if (description.length < 60) {
       error = "Description must be at least 60 characters long.";
+      submitting = false;
       return;
     }
 
@@ -38,12 +45,14 @@
 
     if (existing) {
       error = "That venture name is already taken.";
+      submitting = false;
       return;
     }
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       error = "You must be logged in to create a venture.";
+      submitting = false;
       return;
     }
 
@@ -60,6 +69,7 @@
 
       if (uploadError) {
         error = uploadError.message;
+        submitting = false;
         return;
       }
 
@@ -80,12 +90,14 @@
         category,
         type,
         location,
+        stage, // NEW field
         user_id: user.id,
         image_url
       });
 
     if (insertError) {
       error = insertError.message;
+      submitting = false;
       return;
     }
 
@@ -150,15 +162,26 @@
       </div>
 
       <div>
+        <label class="block text-sm font-medium mb-1">Stage</label>
+        <select bind:value={stage} required
+          class="w-full border rounded-md px-3 py-2 bg-gray-50 focus:ring-2 focus:ring-blue-500">
+          {#each stages as st}
+            <option value={st}>{st}</option>
+          {/each}
+        </select>
+      </div>
+
+      <div>
         <label class="block text-sm font-medium mb-1">Upload image (optional)</label>
         <input type="file" accept="image/*" on:change={(e:any)=> imageFile = e.target.files[0]}
           class="w-full text-sm text-gray-600"/>
       </div>
 
-      <div class="flex justify-end pt-4">
+      <div class="flex justify-end pt-4 mb-20 sm:mb-0">
         <button type="submit"
-          class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition">
-          Create venture profile
+          class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={submitting}>
+          {submitting ? "Creating..." : "Create venture profile"}
         </button>
       </div>
     </form>
