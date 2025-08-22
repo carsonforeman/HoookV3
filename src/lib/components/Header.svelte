@@ -215,23 +215,32 @@
 {/if}
 
 <!-- Bottom Nav (Mobile Only) -->
-{#if $profile}
-  <nav class="sm:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around items-center h-14 z-50">
-    <!-- Home -->
-    <button on:click={goHome} class="flex flex-col items-center text-gray-600 hover:text-gray-900">
-      🏠
-      <span class="text-xs">Home</span>
-    </button>
+<nav class="sm:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around items-center h-14 z-50">
+  <!-- Home -->
+  <button on:click={goHome} class="flex flex-col items-center text-gray-600 hover:text-gray-900">
+    🏠
+    <span class="text-xs">Home</span>
+  </button>
 
-    <!-- New Venture -->
+  <!-- New Venture -->
+  {#if $profile}
     <button
       on:click={() => goto('/ventures/new')}
       class="bg-gray-100 text-gray-700 px-4 py-2 rounded-full shadow hover:bg-gray-200 transition"
     >
       + New Venture
     </button>
+  {:else}
+    <button
+      on:click={() => goto('/mobile-must-signin')}
+      class="bg-gray-100 text-gray-700 px-4 py-2 rounded-full shadow hover:bg-gray-200 transition"
+    >
+      + New Venture
+    </button>
+  {/if}
 
-    <!-- Avatar -->
+  <!-- You -->
+  {#if $profile}
     <button on:click={toggleMenu} class="flex flex-col items-center text-gray-600 hover:text-gray-900">
       {#if $profile?.avatar_url}
         <img src="{$profile.avatar_url}" alt="Profile" class="w-6 h-6 rounded-full object-cover" />
@@ -242,5 +251,10 @@
       {/if}
       <span class="text-xs">You</span>
     </button>
-  </nav>
-{/if}
+  {:else}
+    <button on:click={() => goto('/auth/login')} class="flex flex-col items-center text-gray-600 hover:text-gray-900">
+      👤
+      <span class="text-xs">You</span>
+    </button>
+  {/if}
+</nav>
