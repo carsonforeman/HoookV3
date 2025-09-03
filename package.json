@@ -40,6 +40,9 @@
 		"vite": "^7.0.4"
 	},
 	"dependencies": {
-		"@supabase/supabase-js": "^2.55.0"
+		"@supabase/auth-helpers-sveltekit": "^0.13.0",
+		"@supabase/ssr": "^0.7.0",
+		"@supabase/supabase-js": "^2.55.0",
+		"lucide-svelte": "^0.542.0"
 	}
 }

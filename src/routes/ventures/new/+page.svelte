@@ -1,189 +1,283 @@
 <script lang="ts">
-  import { goto } from "$app/navigation";
-  import { supabase } from "$lib/supabaseClient";
+  import { onMount } from "svelte";
+  import {
+    Lightbulb, Hammer, Rocket, TrendingUp,
+    Palette, Laptop, Package, Briefcase, Heart,
+    Users, DollarSign, GraduationCap
+  } from "lucide-svelte";
 
-  let name = "";
-  let description = "";
-  let category = "business";
-  let type = "";
-  let location = "";
-  let stage = "Idea"; // NEW field
-  let imageFile: File | null = null;
-  let error: string | null = null;
-  let submitting = false;
+  // optional, if you pass it from +page.server load
+  export let data: { user: any } | undefined;
 
-  const states = [
-    "Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut",
-    "Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa",
-    "Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan",
-    "Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire",
-    "New Jersey","New Mexico","New York","North Carolina","North Dakota","Ohio",
-    "Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota",
-    "Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia",
-    "Wisconsin","Wyoming"
+  let step = 1;
+  let error = "";
+
+  type Form = {
+    stage: string;
+    category: string;
+    type: string;
+    location: string;
+    name: string;
+    slug: string;
+    about: string;
+    seeking: string[];
+    logo: File | null;
+  };
+
+  let form: Form = {
+    stage: "",
+    category: "",
+    type: "",
+    location: "",
+    name: "",
+    slug: "",
+    about: "",
+    seeking: [],
+    logo: null
+  };
+
+  const stages = [
+    { value: "idea",     label: "Idea",     desc: "A spark of inspiration, notes, early sketches.", icon: Lightbulb },
+    { value: "starting", label: "Starting", desc: "Taking first steps, building a prototype, testing.", icon: Hammer },
+    { value: "building", label: "Building", desc: "Developing your product, gathering feedback.", icon: Rocket },
+    { value: "growing",  label: "Growing",  desc: "Gaining traction, launching publicly, scaling.", icon: TrendingUp }
   ];
 
-  const stages = ["Idea", "Starting", "Building", "Growing"];
+  const categories = [
+    { value: "creative",         label: "Creative Venture", examples: "Art projects, writing, film, music",           icon: Palette },
+    { value: "digital-product",  label: "Digital Product",  examples: "Apps, software, eBooks, online courses",      icon: Laptop },
+    { value: "physical-product", label: "Physical Product", examples: "Crafts, clothing, electronics",               icon: Package },
+    { value: "service-business", label: "Service Business", examples: "Consulting, coaching, design services",       icon: Briefcase },
+    { value: "social-impact",    label: "Social Impact",    examples: "Nonprofits, education, community projects",   icon: Heart }
+  ];
 
-  async function handleSubmit(e: Event) {
-    e.preventDefault();
-    if (submitting) return;
-    submitting = true;
-    error = null;
+  const seekingOptions = [
+    { value: "investment",   label: "Investment",   desc: "Looking for funding to grow your venture.",         icon: DollarSign },
+    { value: "collaboration",label: "Collaboration",desc: "Seeking partners or co-creators.",                  icon: Users },
+    { value: "mentorship",   label: "Mentorship",   desc: "Guidance from experienced founders or experts.",    icon: GraduationCap }
+  ];
 
-    if (description.length < 60) {
-      error = "Description must be at least 60 characters long.";
-      submitting = false;
-      return;
-    }
+  const states = [
+    "Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","Florida","Georgia",
+    "Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts",
+    "Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey",
+    "New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island",
+    "South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia",
+    "Wisconsin","Wyoming","Outside USA"
+  ];
 
-    const { data: existing } = await supabase
-      .from("ventures")
-      .select("id")
-      .eq("name", name)
-      .maybeSingle();
-
-    if (existing) {
-      error = "That venture name is already taken.";
-      submitting = false;
-      return;
-    }
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      error = "You must be logged in to create a venture.";
-      submitting = false;
-      return;
-    }
-
-    let image_url: string | null = null;
-
-    // if user selected an image
-    if (imageFile) {
-      const fileExt = imageFile.name.split(".").pop();
-      const filePath = `${user.id}/${crypto.randomUUID()}.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("venture-images")
-        .upload(filePath, imageFile);
-
-      if (uploadError) {
-        error = uploadError.message;
-        submitting = false;
-        return;
+  // Restore (ignore logo, can't serialize)
+  onMount(() => {
+    try {
+      const saved = typeof localStorage !== "undefined" ? localStorage.getItem("ventureForm") : null;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        form = { ...form, ...parsed, logo: null };
       }
-
-      // get full public URL
-      const { data: publicUrlData } = supabase.storage
-        .from("venture-images")
-        .getPublicUrl(filePath);
-
-      image_url = publicUrlData.publicUrl;
+    } catch (err) {
+      console.warn("Error loading form from localStorage", err);
     }
+  });
 
-    // insert venture
-    const { error: insertError } = await supabase
-      .from("ventures")
-      .insert({
-        name,
-        description,
-        category,
-        type,
-        location,
-        stage, // NEW field
-        user_id: user.id,
-        image_url
-      });
-
-    if (insertError) {
-      error = insertError.message;
-      submitting = false;
-      return;
+  // Persist (skip logo)
+  $: {
+    if (typeof localStorage !== "undefined") {
+      const { logo, ...serializable } = form;
+      localStorage.setItem("ventureForm", JSON.stringify(serializable));
     }
+  }
 
-    goto("/");
+  // Slugify as they type
+  $: form.slug = form.name
+    ? form.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")
+    : "";
+
+  function next() {
+    error = "";
+    if (step === 1 && !form.name.trim()) { error = "Please enter a venture name."; return; }
+    if (step === 2 && (!form.about || form.about.length < 60)) { error = "Description must be at least 60 characters."; return; }
+    if (step === 3 && !form.stage) { error = "Please select a stage."; return; }
+    if (step === 4 && !form.category) { error = "Please select a category."; return; }
+    if (step === 5 && !form.type.trim()) { error = "Please enter the type of your venture."; return; }
+    if (step === 6 && !form.location) { error = "Please select a location."; return; }
+    if (step === 7 && form.seeking.length === 0) { error = "Please select at least one option."; return; }
+    // Do NOT auto-submit here; final step has a real submit button
+    step = Math.min(8, step + 1);
+  }
+
+  function back() { step = Math.max(1, step - 1); }
+
+  function toggleSeeking(value: string) {
+    if (form.seeking.includes(value)) {
+      form.seeking = form.seeking.filter(v => v !== value);
+    } else {
+      form.seeking = [...form.seeking, value];
+    }
   }
 </script>
 
+<form id="create-venture" method="post" enctype="multipart/form-data" class="flex min-h-screen">
+  <!-- Left image only on step 1 -->
+  {#if step === 1}
+    <div class="w-1/2 flex items-start justify-center p-8">
+      <img src="/images/phone.png" alt="Phone preview" class="h-[600px] object-contain" />
+    </div>
+  {/if}
 
-<div class="min-h-screen bg-[#f0f8ff] py-12">
-  <div class="max-w-xl mx-auto bg-white shadow-md rounded-lg p-8">
-    <h1 class="text-3xl font-bold mb-2 text-left">
-      Create a new venture profile
-    </h1>
-    <p class="text-gray-600 mb-8 text-left">
-      Give your idea a digital home while it develops. A venture profile makes it easy 
-      to be discovered, attract interest, and manage collaboration as it grows.
-    </p>
-
-    {#if error}
-      <p class="text-red-600 mb-4">{error}</p>
+  <div class="{step === 1 ? 'w-1/2 p-12' : 'w-full max-w-xl mx-auto p-12'}">
+    {#if step === 1}
+      <h1 class="text-2xl font-bold mb-4">
+        Get your venture discovered by collaborators, supporters, and future customers.
+      </h1>
+      <p class="text-gray-500 mb-6">What is the name of this venture?</p>
+      <input
+        type="text"
+        bind:value={form.name}
+        name="name"
+        class="border p-2 rounded w-full mb-4"
+      />
+      <div class="text-sm text-gray-500 mb-6">Your profile link: hoook.com/ventures/{form.slug || "your-name"}</div>
     {/if}
 
-    <form on:submit={handleSubmit} class="space-y-6">
-      <div>
-        <label class="block text-sm font-medium mb-1">Venture name</label>
-        <input type="text" bind:value={name} required
-          class="w-full border rounded-md px-3 py-2 bg-gray-50 focus:ring-2 focus:ring-blue-500"/>
-      </div>
+    {#if step === 2}
+      <h2 class="text-lg font-bold mt-8 mb-2">What is a brief description of your venture?</h2>
+      <textarea
+        bind:value={form.about}
+        name="about"
+        rows="5"
+        class="border p-2 rounded w-full mb-6"
+      ></textarea>
+    {/if}
 
-      <div>
-        <label class="block text-sm font-medium mb-1">Description</label>
-        <textarea bind:value={description} rows="3" required minlength="60"
-          placeholder="A short description of your venture..."
-          class="w-full border rounded-md px-3 py-2 bg-gray-50 focus:ring-2 focus:ring-blue-500"></textarea>
+    {#if step === 3}
+      <h2 class="text-lg font-bold mt-8 mb-2">Which stage best describes your venture?</h2>
+      <p class="text-sm text-gray-500 mb-4">Choose the stage that fits you best right now.</p>
+      <div class="grid grid-cols-2 gap-3 mb-6">
+        {#each stages as s}
+          <button
+            type="button"
+            class="border p-3 rounded-xl flex items-center gap-3 text-left hover:border-blue-400 transition
+              {form.stage === s.value ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}"
+            on:click={() => form.stage = s.value}
+          >
+            <s.icon class="w-5 h-5" /> 
+            <div>
+              <div class="font-medium">{s.label}</div>
+              <div class="text-sm text-gray-500">{s.desc}</div>
+            </div>
+          </button>
+        {/each}
       </div>
+    {/if}
 
-      <div>
-        <label class="block text-sm font-medium mb-1">Category</label>
-        <select bind:value={category}
-          class="w-full border rounded-md px-3 py-2 bg-gray-50 focus:ring-2 focus:ring-blue-500">
-          <option value="business">Business</option>
-          <option value="creative">Creative</option>
-        </select>
+    {#if step === 4}
+      <h2 class="text-lg font-bold mt-8 mb-2">What category does your venture belong to?</h2>
+      <p class="text-sm text-gray-500 mb-4">Pick the category that best represents your work.</p>
+      <div class="grid grid-cols-2 gap-3 mb-6">
+        {#each categories as c}
+          <button
+            type="button"
+            class="border p-3 rounded-xl flex items-center gap-3 text-left hover:border-blue-400 transition
+              {form.category === c.value ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}"
+            on:click={() => form.category = c.value}
+          >
+            <c.icon class="w-5 h-5" />
+            <div>
+              <div class="font-medium">{c.label}</div>
+              <div class="text-sm text-gray-500">{c.examples}</div>
+            </div>
+          </button>
+        {/each}
       </div>
+    {/if}
 
-      <div>
-        <label class="block text-sm font-medium mb-1">Type</label>
-        <input type="text" bind:value={type}
-          placeholder="e.g. music album, restaurant"
-          class="w-full border rounded-md px-3 py-2 bg-gray-50 focus:ring-2 focus:ring-blue-500"/>
+    {#if step === 5}
+      <h2 class="text-lg font-bold mt-8 mb-2">What type of venture is this?</h2>
+      <input
+        type="text"
+        bind:value={form.type}
+        name="type"
+        class="border p-2 rounded w-full mb-6"
+      />
+    {/if}
+
+    {#if step === 6}
+      <h2 class="text-lg font-bold mt-8 mb-2">Where is your venture based?</h2>
+      <select
+        bind:value={form.location}
+        name="location"
+        class="border p-2 rounded w-full mb-6"
+      >
+        <option value="">Select a state</option>
+        {#each states as st}
+          <option value={st}>{st}</option>
+        {/each}
+      </select>
+    {/if}
+
+    {#if step === 7}
+      <h2 class="text-lg font-bold mt-8 mb-2">What are you seeking right now?</h2>
+      <p class="text-sm text-gray-500 mb-4">You can select <strong>multiple</strong> options.</p>
+      <div class="grid grid-cols-2 gap-3 mb-6">
+        {#each seekingOptions as o}
+          <button
+            type="button"
+            class="border p-3 rounded-xl flex items-center gap-3 text-left hover:border-blue-400 transition
+              {form.seeking.includes(o.value) ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}"
+            on:click={() => toggleSeeking(o.value)}
+          >
+            <o.icon class="w-5 h-5" />
+            <div>
+              <div class="font-medium">{o.label}</div>
+              <div class="text-sm text-gray-500">{o.desc}</div>
+            </div>
+          </button>
+        {/each}
       </div>
+    {/if}
 
-      <div>
-        <label class="block text-sm font-medium mb-1">Location of venture</label>
-        <select bind:value={location} required
-          class="w-full border rounded-md px-3 py-2 bg-gray-50 focus:ring-2 focus:ring-blue-500">
-          <option value="" disabled>Select a state</option>
-          {#each states as s}
-            <option value={s}>{s}</option>
-          {/each}
-        </select>
-      </div>
+    {#if step === 8}
+      <h2 class="text-lg font-bold mt-8 mb-2">Upload your venture logo</h2>
+      <input
+        type="file"
+        name="logo"
+        accept="image/*"
+        on:change={(e) => form.logo = (e.target as HTMLInputElement).files?.[0] || null}
+        class="mb-6"
+      />
+    {/if}
 
-      <div>
-        <label class="block text-sm font-medium mb-1">Stage</label>
-        <select bind:value={stage} required
-          class="w-full border rounded-md px-3 py-2 bg-gray-50 focus:ring-2 focus:ring-blue-500">
-          {#each stages as st}
-            <option value={st}>{st}</option>
-          {/each}
-        </select>
-      </div>
+    {#if error}
+      <div class="bg-red-100 text-red-700 p-3 rounded mb-4">{error}</div>
+    {/if}
 
-      <div>
-        <label class="block text-sm font-medium mb-1">Upload image (optional)</label>
-        <input type="file" accept="image/*" on:change={(e:any)=> imageFile = e.target.files[0]}
-          class="w-full text-sm text-gray-600"/>
-      </div>
+    <!-- Navigation buttons -->
+    <div class="flex justify-between mt-6">
+      {#if step > 1}
+        <button type="button" on:click={back} class="px-4 py-2 border rounded">Back</button>
+      {/if}
 
-      <div class="flex justify-end pt-4 mb-20 sm:mb-0">
-        <button type="submit"
-          class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed"
-          disabled={submitting}>
-          {submitting ? "Creating..." : "Create venture profile"}
+      {#if step < 8}
+        <button type="button" on:click={next} class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded">
+          Next
         </button>
-      </div>
-    </form>
+      {:else}
+        <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded">
+          Create Venture
+        </button>
+      {/if}
+    </div>
   </div>
-</div>
+
+  <!-- Hidden inputs kept in-sync so the action receives everything -->
+  <input type="hidden" name="name"     value={form.name} />
+  <input type="hidden" name="about"    value={form.about} />
+  <input type="hidden" name="stage"    value={form.stage} />
+  <input type="hidden" name="category" value={form.category} />
+  <input type="hidden" name="type"     value={form.type} />
+  <input type="hidden" name="location" value={form.location} />
+  <input type="hidden" name="slug"     value={form.slug} />
+  {#each form.seeking as s}
+    <input type="hidden" name="seeking" value={s} />
+  {/each}
+</form>

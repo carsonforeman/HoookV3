@@ -1,10 +1,43 @@
 {
 	"/": [
-		"src/routes/+page.ts"
+		"src/routes/+page.ts",
+		"src/routes/+layout.server.ts",
+		"src/routes/+layout.server.ts"
 	],
-	"/auth": [],
-	"/auth/login": [],
-	"/auth/signup": [],
-	"/mobile-must-signin": [],
-	"/ventures/new": []
+	"/auth": [
+		"src/routes/+layout.server.ts"
+	],
+	"/auth/login": [
+		"src/routes/auth/login/+page.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/auth/logout": [
+		"src/routes/auth/logout/+server.ts"
+	],
+	"/auth/signup": [
+		"src/routes/auth/signup/+page.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/dashboard": [
+		"src/routes/dashboard/+page.server.ts",
+		"src/routes/+layout.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/mobile-must-signin": [
+		"src/routes/+layout.server.ts"
+	],
+	"/ventures/new": [
+		"src/routes/ventures/new/+page.server.ts",
+		"src/routes/ventures/new/+layout.server.ts",
+		"src/routes/+layout.server.ts",
+		"src/routes/ventures/new/+layout.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/ventures/new/[slug]": [
+		"src/routes/ventures/new/[slug]/+page.server.ts",
+		"src/routes/ventures/new/+layout.server.ts",
+		"src/routes/+layout.server.ts",
+		"src/routes/ventures/new/+layout.server.ts",
+		"src/routes/+layout.server.ts"
+	]
 }
