@@ -4,6 +4,7 @@
 </script>
 
 <!-- Header stays across all tabs -->
-<New_Venture_Header {data.user} {data.profile} />
+<New_Venture_Header user={data.user} profile={data.profile} />
+
 
 <slot />
