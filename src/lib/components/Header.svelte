@@ -49,7 +49,7 @@
         />
       {:else}
         <a href="/" class="flex items-center space-x-2 shrink-0">
-          <img src="/images/hoooklogo.png" alt="Hoook Logo" class="h-8 w-auto" />
+          <img src="/images/hoooklogo.png" alt="Hoook Logo" class="h-12 w-auto" />
           <span class="sr-only">Hoook</span>
         </a>
         <button on:click={() => (searchOpen = true)} class="text-gray-600 hover:text-gray-900">🔍</button>

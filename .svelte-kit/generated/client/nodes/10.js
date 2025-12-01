@@ -1,1 +1,1 @@
-export { default as component } from "../../../../src/routes/mobile-must-signin/+page.svelte";
+export { default as component } from "../../../../src/routes/dashboard/+page.svelte";
