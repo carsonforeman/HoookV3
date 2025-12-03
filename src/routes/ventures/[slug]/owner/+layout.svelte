@@ -1,43 +1,76 @@
-<script>
+<script lang="ts">
   export let data;
+
   const venture = data.venture;
+  const user = data.user;
+
+  const titleCase = (str: string) =>
+    str ? str.replace(/\b\w/g, (c) => c.toUpperCase()) : "";
 </script>
 
-<div class="max-w-5xl mx-auto px-6 pt-10">
+<!-- ========================= -->
+<!-- 🌐 OWNER VIEW MAIN WRAPPER -->
+<!-- ========================= -->
+<div class="flex-1 pb-20 md:pb-0">
 
-  <!-- OWNER HEADER -->
-  <h1 class="text-2xl font-bold mb-2">Manage: {venture.name}</h1>
-  <p class="text-gray-500 text-sm mb-6">Owner Dashboard</p>
+  <!-- ========================= -->
+  <!-- ⭐ OWNER HEADER -->
+  <!-- ========================= -->
+  <header class="p-6 border-b bg-white flex items-start justify-between max-w-5xl mx-auto">
 
-  <!-- OWNER TABS -->
-  <nav class="flex gap-6 border-b pb-3 text-gray-700 text-sm mb-8">
+    <div class="flex items-center gap-4">
 
-    <a href="/ventures/{venture.slug}/owner/dashboard"
-      class="hover:text-blue-600"
-    >Dashboard</a>
+      <!-- LOGO -->
+      {#if venture.logo_url}
+        <img
+          src={venture.logo_url}
+          alt="{venture.name} logo"
+          class="w-40 h-40 rounded-2xl object-cover border shadow-sm"
+        />
+      {:else}
+        <div
+          class="w-40 h-40 rounded-2xl bg-gray-200 flex items-center justify-center font-bold text-3xl"
+        >
+          {venture.name.slice(0, 2).toUpperCase()}
+        </div>
+      {/if}
 
-    <a href="/ventures/{venture.slug}/owner/progress"
-      class="hover:text-blue-600"
-    >Progress</a>
+      <!-- NAME / TYPE / LOCATION -->
+      <div class="max-w-[70%]">
+        <h1 class="text-3xl font-bold">{venture.name}</h1>
+        <p class="text-gray-600 mt-1 text-sm">
+          {titleCase(venture.type)} • {titleCase(venture.location)}
+        </p>
 
-    <a href="/ventures/{venture.slug}/owner/ideas"
-      class="hover:text-blue-600"
-    >Ideas</a>
+        {#if venture.about}
+          <p class="text-gray-700 mt-3 whitespace-pre-line">
+            {venture.about}
+          </p>
+        {/if}
 
-    <a href="/ventures/{venture.slug}/owner/sessions"
-      class="hover:text-blue-600"
-    >Sessions</a>
+        <a 
+          href={`/ventures/${venture.slug}/owner/edit`}
+          class="text-blue-600 text-sm mt-3 inline-block hover:underline"
+        >
+          Edit venture details
+        </a>
+      </div>
+    </div>
 
-    <a href="/ventures/{venture.slug}/owner/tasks"
-      class="hover:text-blue-600"
-    >Tasks</a>
+    <!-- View-as-user -->
+    <a
+      href={`/ventures/${venture.slug}`}
+      class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 h-fit"
+    >
+      View as User
+    </a>
 
-    <a href="/ventures/{venture.slug}/owner/team"
-      class="hover:text-blue-600"
-    >Team</a>
+  </header>
 
-  </nav>
-
-  <slot />
-
+  <!-- ========================= -->
+  <!-- 🔥 PAGE CONTENT -->
+  <!-- ========================= -->
+  <main class="p-6 max-w-5xl mx-auto">
+    <slot />
+  </main>
 </div>

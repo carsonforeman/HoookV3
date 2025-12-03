@@ -1,25 +1,23 @@
-import { error } from "@sveltejs/kit";
+// /src/routes/ventures/[slug]/(owner)/+layout.server.ts
+import type { LayoutServerLoad } from "./$types";
+import { redirect } from "@sveltejs/kit";
 
-export const load = async ({ locals, params }) => {
-  const { supabase, user } = locals;
+export const load: LayoutServerLoad = async ({ params, locals }) => {
+  const { slug } = params;
 
   // Fetch venture
-  const { data: venture, error: ventureError } = await supabase
+  const { data: venture } = await locals.supabase
     .from("ventures")
     .select("*")
-    .eq("slug", params.slug)
+    .eq("slug", slug)
     .single();
 
-  if (ventureError || !venture) {
-    throw error(404, "Venture not found");
+  if (!venture) redirect(302, "/ventures");
+
+  // Only owner can view
+  if (!locals.user || locals.user.id !== venture.uid) {
+    redirect(302, `/ventures/${slug}`);
   }
 
-  // IMPORTANT:
-  // Public view MUST NOT block access.
-  // It simply loads the venture AND the current user.
-
-  return {
-    venture,
-    user // <-- PUBLIC LAYOUT NEEDS THIS FOR OWNER BUTTON!
-  };
+  return { venture };
 };

@@ -2,29 +2,31 @@
   import "../app.css";
   import { page } from "$app/stores";
 
-  // matches +layout.server.ts
+  import GlobalNav from "$lib/components/GlobalNav.svelte";
+
   export let data: { user: any; profile: any };
 </script>
 
-<div class="flex flex-col min-h-screen">
+<div class="flex min-h-screen">
+
   {#if !$page.url.pathname.startsWith("/auth")}
-    <!-- Normal pages -->
-    <main class="flex-1 pb-16 sm:pb-0">
+
+    <!-- GLOBAL NAV -->
+    <GlobalNav {data} />
+
+    <!-- Shift content by 10rem so collapsed sidebar never overlaps -->
+    <main
+      class="flex-1 min-h-screen pb-20 md:pb-0 md:ml-[10rem]"
+    >
       <slot />
     </main>
 
   {:else}
-    <!-- Auth pages -->
-    <!-- Mobile: still no header now -->
-    <div class="sm:hidden">
-      <main class="flex-1 pb-16">
-        <slot />
-      </main>
-    </div>
 
-    <!-- Desktop: no header/footer -->
-    <div class="hidden sm:block">
+    <!-- AUTH PAGES -->
+    <main class="flex-1 min-h-screen">
       <slot />
-    </div>
+    </main>
+
   {/if}
 </div>

@@ -1,185 +1,116 @@
 <script lang="ts">
-  import { MapPin, Hammer, Rocket, TrendingUp, Target } from "lucide-svelte";
+  import { MapPin } from "lucide-svelte";
+  export let venture;
 
-  export let venture: {
-    id: string;
-    uid: string;
-    name: string;
-    slug: string;
-    type: string;
-    about: string;
-    location: string;
-    stage: string;          
-    seeking: string[] | string;     
-    logo_url: string | null;
-  };
-
-  /* --------------------------------------------
-     Normalize stage 
-  -------------------------------------------- */
-  const normalizedStage = venture.stage?.toLowerCase();
-
-  const stageMap = {
-    starting: {
-      icon: Hammer,
-      label: "Starting",
-      color: "bg-yellow-100 text-yellow-700"
-    },
-    building: {
-      icon: Rocket,
-      label: "Building",
-      color: "bg-green-100 text-green-700"
-    },
-    growing: {
-      icon: TrendingUp,
-      label: "Growing",
-      color: "bg-blue-100 text-blue-700"
-    }
-  };
-
-  /* --------------------------------------------
-     Normalize seeking list (array OR string → array)
-  -------------------------------------------- */
-  let seekingList: string[] = [];
-
-  $: {
-    if (Array.isArray(venture.seeking)) {
-      seekingList = venture.seeking;
-    } else if (typeof venture.seeking === "string") {
-      try {
-        seekingList = JSON.parse(venture.seeking);
-      } catch {
-        seekingList = [];
-      }
-    }
-  }
-
-  /* --------------------------------------------
-     Seeking badge colors
-  -------------------------------------------- */
-  const seekingColors: Record<string, string> = {
-    collaboration: "bg-yellow-100 text-yellow-700",
-    mentorship: "bg-purple-100 text-purple-700",
-    investment: "bg-green-100 text-green-700",
-    feedback: "bg-blue-100 text-blue-700"
-  };
-
-  /* --------------------------------------------
-     Title case helper
-  -------------------------------------------- */
-  function titleCase(str: string): string {
+  /* ------------------------
+      Title Case Helper
+  ------------------------ */
+  function titleCase(str: string = "") {
     return str
-      ? str.replace(/\w\S*/g, (txt) => txt[0].toUpperCase() + txt.slice(1).toLowerCase())
-      : "";
+      .toLowerCase()
+      .split(" ")
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" ");
   }
 
-  /* --------------------------------------------
-     Initials: 1–2 letters smartly
-  -------------------------------------------- */
+  /* ------------------------
+      FIX: Format Location
+      Always → City, ST
+  ------------------------ */
+  function formatLocation(loc: string = "") {
+    const parts = loc.split(",").map(s => s.trim());
+
+    if (parts.length === 2) {
+      const city = titleCase(parts[0]);
+      const state = parts[1].substring(0, 2).toUpperCase();  // FORCE 2-letter code
+      return `${city}, ${state}`;
+    }
+
+    return titleCase(loc);
+  }
+
+  /* Stage badge styles */
+  const stageStyles = {
+    starting:  { label: "Starting",  color: "bg-yellow-500" },
+    building:  { label: "Building",  color: "bg-green-500" },
+    growing:   { label: "Growing",   color: "bg-blue-500" }
+  };
+
+  const normalizedStage = venture.stage?.toLowerCase();
+  const stage = stageStyles[normalizedStage];
+
+  /* Initials fallback */
   function getInitials(name: string) {
-    if (!name) return "";
-    const words = name.trim().split(" ").filter(Boolean);
-
-    if (words.length >= 2) {
-      return (words[0][0] + words[1][0]).toUpperCase();
-    }
-
-    const word = words[0];
-    return word.substring(0, 2).toUpperCase();
+    const parts = name.trim().split(" ");
+    return parts.length >= 2
+      ? (parts[0][0] + parts[1][0]).toUpperCase()
+      : parts[0].substring(0, 2).toUpperCase();
   }
 
-  /* --------------------------------------------
-     Deterministic gradient generator
-  -------------------------------------------- */
-  function hashString(str: string): number {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    return Math.abs(hash);
+  /* Gradient generator */
+  function hashString(str: string) {
+    let h = 0;
+    for (let i = 0; i < str.length; i++) h = str.charCodeAt(i) + ((h << 5) - h);
+    return Math.abs(h);
   }
 
-  const gradientPalette = [
-    ["#6366f1", "#3b82f6"], // indigo → blue
-    ["#a855f7", "#ec4899"], // purple → pink
-    ["#14b8a6", "#0ea5e9"], // teal → sky blue
-    ["#f97316", "#ef4444"], // orange → red
-    ["#10b981", "#22c55e"]  // green → emerald
+  const gradients = [
+    ["#6366f1", "#3b82f6"],
+    ["#a855f7", "#ec4899"],
+    ["#14b8a6", "#0ea5e9"],
+    ["#f97316", "#ef4444"],
+    ["#10b981", "#22c55e"]
   ];
 
   function getGradient(name: string) {
-    const hash = hashString(name);
-    const pair = gradientPalette[hash % gradientPalette.length];
-    return `background: linear-gradient(135deg, ${pair[0]}, ${pair[1]});`;
+    const [a, b] = gradients[hashString(name) % gradients.length];
+    return `background: linear-gradient(135deg, ${a}, ${b});`;
   }
 </script>
 
 <a href={`/ventures/${venture.slug}`} class="block">
-  <div class="bg-white shadow-md rounded-lg overflow-hidden hover:shadow-lg transition duration-300 flex flex-col cursor-pointer hover:scale-[1.02]">
+  <div class="bg-white rounded-xl border border-gray-100 shadow-sm flex flex-col overflow-hidden
+              hover:shadow-md hover:scale-[1.01] transition duration-200">
 
-    <!-- Logo or autogenerated gradient -->
-    {#if venture.logo_url}
-      <img
-        src={venture.logo_url}
-        alt={venture.name}
-        class="w-full h-48 object-cover"
-      />
-    {:else}
-      <div
-        class="w-full h-48 flex items-center justify-center text-white text-4xl font-bold"
-        style={getGradient(venture.name)}
-      >
-        {getInitials(venture.name)}
-      </div>
-    {/if}
+    <!-- IMAGE (fixed height) -->
+    <div class="relative h-40 w-full">
+      {#if venture.logo_url}
+        <img src={venture.logo_url} class="h-full w-full object-cover" alt={venture.name} />
+      {:else}
+        <div class="h-full w-full flex items-center justify-center text-white text-4xl font-bold"
+             style={getGradient(venture.name)}>
+          {getInitials(venture.name)}
+        </div>
+      {/if}
 
-    <div class="p-4 flex flex-col flex-1">
+      {#if stage}
+        <span class={`absolute top-2 left-2 px-2 py-1 text-xs text-white rounded-full ${stage.color}`}>
+          {stage.label}
+        </span>
+      {/if}
+    </div>
 
-      <!-- Name -->
-      <h2 class="text-lg font-semibold mb-1">{venture.name}</h2>
+    <!-- CONTENT (fixed calibrated height) -->
+    <div class="p-4 flex flex-col min-h-[170px]">
 
-      <!-- Type -->
-      <p class="text-blue-600 text-sm font-medium mb-1">
+      <h2 class="text-lg font-semibold mb-1 line-clamp-1">
+        {venture.name}
+      </h2>
+
+      <p class="text-blue-600 text-xs font-medium mb-2 line-clamp-1">
         {titleCase(venture.type)}
       </p>
 
-      <!-- Location -->
-      <p class="text-gray-500 text-xs mb-3 flex items-center gap-1">
-        <MapPin class="w-3 h-3" />
-        {titleCase(venture.location)}
-      </p>
-
-      <!-- About -->
-      <p class="text-gray-700 mb-3 flex-1 line-clamp-3">
+      <p class="text-gray-700 text-sm mb-3 line-clamp-3">
         {venture.about}
       </p>
 
-      <!-- Badges -->
-      <div class="flex flex-wrap gap-2 mt-auto">
-
-        <!-- Stage badge -->
-        {#if stageMap[normalizedStage]}
-          <span
-            class={`inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full font-medium ${stageMap[normalizedStage].color}`}
-          >
-            <svelte:component this={stageMap[normalizedStage].icon} class="w-3 h-3" />
-            {stageMap[normalizedStage].label}
-          </span>
-        {/if}
-
-        <!-- Seeking badges -->
-        {#each seekingList as s}
-          <span
-            class={`inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full font-medium ${
-              seekingColors[s.toLowerCase()] ?? "bg-gray-200 text-gray-700"
-            }`}
-          >
-            <Target class="w-3 h-3" />
-            {titleCase(s)}
-          </span>
-        {/each}
-
+      <!-- LOCATION ON BOTTOM ALWAYS -->
+      <div class="flex items-center text-gray-500 text-xs mt-auto">
+        <MapPin class="w-3 h-3 mr-1" />
+        {formatLocation(venture.location)}
       </div>
+
     </div>
   </div>
 </a>

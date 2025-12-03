@@ -12,8 +12,8 @@ type EnsureDefined<T> = T extends null | undefined ? {} : T;
 type OptionalUnion<U extends Record<string, any>, A extends keyof U = U extends U ? keyof U : never> = U extends unknown ? { [P in Exclude<A, keyof U>]?: never } & U : never;
 export type Snapshot<T = any> = Kit.Snapshot<T>;
 type PageParentData = EnsureDefined<LayoutData>;
-type LayoutRouteId = RouteId | "/" | "/auth/login" | "/auth/signup" | "/dashboard" | "/mobile-must-signin" | "/ventures/new" | "/ventures/[slug]" | "/ventures/[slug]/ideas" | "/ventures/[slug]/owner/dashboard" | "/ventures/[slug]/owner/ideas" | "/ventures/[slug]/owner/progress" | "/ventures/[slug]/owner/sessions" | "/ventures/[slug]/owner/tasks" | "/ventures/[slug]/owner/team" | "/ventures/[slug]/progress" | "/ventures/[slug]/sessions" | "/ventures/[slug]/tasks" | "/ventures/[slug]/team" | null
-type LayoutParams = RouteParams & { slug?: string }
+type LayoutRouteId = RouteId | "/" | "/auth/login" | "/auth/signup" | "/dashboard" | "/mobile-must-signin" | "/profile/[id]" | "/ventures/new" | "/ventures/[slug]/(public)" | "/ventures/[slug]/(public)/ideas" | "/ventures/[slug]/(public)/progress" | "/ventures/[slug]/(public)/sessions" | "/ventures/[slug]/(public)/tasks" | "/ventures/[slug]/(public)/team" | "/ventures/[slug]/owner" | null
+type LayoutParams = RouteParams & { id?: string; slug?: string }
 type LayoutServerParentData = EnsureDefined<{}>;
 type LayoutParentData = EnsureDefined<{}>;
 

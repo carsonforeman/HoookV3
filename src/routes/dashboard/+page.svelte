@@ -1,171 +1,124 @@
 <script lang="ts">
   export let data;
-  export let form;
 
-  let editing = false;
+  const profile = data?.profile;
+  const ventures = data?.ventures ?? [];
 
-  function toggleEdit() {
-    editing = !editing;
+  function initials(name: string) {
+    return name?.charAt(0)?.toUpperCase() ?? "?";
   }
 </script>
 
-{#if data.error}
-  <p class="text-red-500">{data.error}</p>
-{/if}
+<div class="max-w-5xl mx-auto px-6 py-10 space-y-10">
 
-{#if data.profile}
-  <div class="max-w-2xl mx-auto p-6 space-y-6">
-    <!-- Profile Card -->
-    <div class="bg-white shadow rounded-lg p-6">
-      <div class="flex items-center space-x-4">
-        <!-- Avatar (clickable in edit mode) -->
-        <label for="avatar" class="cursor-pointer relative">
-          <img
-            src={data.profile.avatar_url || '/images/default-avatar.png'}
-            alt="Avatar"
-            class="w-20 h-20 rounded-full object-cover border hover:opacity-80"
-          />
-          {#if editing}
-            <input
-              type="file"
-              id="avatar"
-              name="avatar"
-              accept="image/*"
-              class="hidden"
-            />
-          {/if}
-        </label>
-        <div>
-          <h2 class="text-xl font-semibold">
-            {data.profile.first_name} {data.profile.last_name}
-          </h2>
-          <p class="text-gray-500">{data.profile.role || 'No role set'}</p>
-        </div>
+  <!-- ========================== -->
+  <!-- PAGE TITLE -->
+  <!-- ========================== -->
+  <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
+
+  <!-- ========================== -->
+  <!-- PROFILE CARD -->
+  <!-- ========================== -->
+  <section class="bg-white border rounded-xl p-6 shadow-sm flex items-center gap-6">
+
+    {#if profile?.avatar_url}
+      <img
+        src={profile.avatar_url}
+        alt="Profile"
+        class="w-20 h-20 rounded-full object-cover border"
+      />
+    {:else}
+      <div class="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center text-2xl font-bold text-gray-700">
+        {initials(profile?.first_name ?? profile?.last_name ?? "")}
       </div>
+    {/if}
 
-      <!-- Profile Details -->
-      <div class="mt-6">
-        <form method="POST" class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium">First Name</label>
-            {#if editing}
-              <input
-                type="text"
-                name="first_name"
-                class="w-full border rounded px-3 py-2"
-                value={data.profile.first_name || ''}
-              />
-            {:else}
-              <p class="text-gray-700">{data.profile.first_name || '-'}</p>
-            {/if}
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium">Last Name</label>
-            {#if editing}
-              <input
-                type="text"
-                name="last_name"
-                class="w-full border rounded px-3 py-2"
-                value={data.profile.last_name || ''}
-              />
-            {:else}
-              <p class="text-gray-700">{data.profile.last_name || '-'}</p>
-            {/if}
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium">State</label>
-            {#if editing}
-              <select
-                name="state"
-                class="w-full border rounded px-3 py-2"
-                value={data.profile.state || ''}
-              >
-                <option value="">Select state</option>
-                <option value="CA">California</option>
-                <option value="NY">New York</option>
-                <option value="TX">Texas</option>
-                <!-- Add all states here -->
-              </select>
-            {:else}
-              <p class="text-gray-700">{data.profile.state || '-'}</p>
-            {/if}
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium">Role</label>
-            {#if editing}
-              <select
-                name="role"
-                class="w-full border rounded px-3 py-2"
-                value={data.profile.role || ''}
-              >
-                <option value="">Select role</option>
-                <option value="student">Student</option>
-                <option value="professional">Professional</option>
-              </select>
-            {:else}
-              <p class="text-gray-700">{data.profile.role || '-'}</p>
-            {/if}
-          </div>
-
-          <!-- Buttons -->
-          <div class="flex items-center space-x-4 mt-4">
-            {#if editing}
-              <button
-                type="submit"
-                name="updateProfile"
-                value="true"
-                class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-              >
-                Save
-              </button>
-              <button
-                type="button"
-                on:click={toggleEdit}
-                class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
-              >
-                Cancel
-              </button>
-            {:else}
-              <button
-                type="button"
-                on:click={toggleEdit}
-                class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-              >
-                Edit Profile
-              </button>
-            {/if}
-          </div>
-
-          {#if form?.error}
-            <p class="text-red-500">{form.error}</p>
-          {/if}
-          {#if form?.success}
-            <p class="text-green-500">Profile updated!</p>
-          {/if}
-        </form>
-      </div>
+    <div class="flex-1">
+      <h2 class="text-xl font-semibold">
+        {profile?.first_name} {profile?.last_name}
+      </h2>
+      <p class="text-gray-600 text-sm">
+        {profile?.state || "No location set"}
+      </p>
     </div>
 
-    <!-- Ventures Section -->
-    <div class="bg-white shadow rounded-lg p-6">
-      <h3 class="text-lg font-semibold mb-4">My Ventures</h3>
-      {#if data.ventures?.length > 0}
-        <ul class="space-y-2">
-          {#each data.ventures as venture}
-            <li class="p-4 border rounded hover:bg-gray-50">
-              <h4 class="font-medium">{venture.name}</h4>
-              <p class="text-sm text-gray-600">{venture.description}</p>
-            </li>
-          {/each}
-        </ul>
-      {:else}
-        <p class="text-gray-500">You don’t have any ventures yet.</p>
-      {/if}
+    <a
+      href="/myprofile"
+      class="px-4 py-2 rounded-lg text-blue-600 border border-blue-200 hover:bg-blue-50 text-sm font-medium"
+    >
+      Edit Profile
+    </a>
+  </section>
+
+  <!-- ========================== -->
+  <!-- VENTURES LIST -->
+  <!-- ========================== -->
+  <section class="space-y-4">
+
+    <div class="flex items-center justify-between">
+      <h2 class="text-xl font-semibold text-gray-900">Your Ventures</h2>
+
+      <a
+        href="/ventures/new"
+        class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+      >
+        + New Venture
+      </a>
     </div>
-  </div>
-{:else}
-  <p>No profile found. Please sign in or create one.</p>
-{/if}
+
+    {#if ventures.length === 0}
+      <div class="bg-white border rounded-xl p-6 text-center text-gray-600">
+        You haven’t created any ventures yet.
+      </div>
+    {:else}
+      <div class="grid gap-4">
+        {#each ventures as v}
+          <a
+            href={`/ventures/${v.slug}/owner`}
+            class="bg-white border rounded-xl p-5 shadow-sm flex items-center justify-between hover:bg-gray-50"
+          >
+            <div>
+              <h3 class="font-medium text-gray-900">{v.name}</h3>
+              <p class="text-gray-600 text-sm line-clamp-1">
+                {v.description || "No description"}
+              </p>
+            </div>
+
+            <span class="text-blue-600 text-sm font-medium">Manage →</span>
+          </a>
+        {/each}
+      </div>
+    {/if}
+
+  </section>
+
+  <!-- ========================== -->
+  <!-- QUICK ACTIONS -->
+  <!-- ========================== -->
+  <section class="bg-white border rounded-xl p-6 shadow-sm space-y-4">
+
+    <h2 class="text-xl font-semibold text-gray-900">Quick Actions</h2>
+
+    <div class="grid sm:grid-cols-2 gap-4">
+
+      <a
+        href="/ventures/new"
+        class="block p-4 border rounded-lg hover:bg-gray-50"
+      >
+        <p class="font-medium text-gray-900">Create a New Venture</p>
+        <p class="text-gray-600 text-sm mt-1">Start something new—idea or project.</p>
+      </a>
+
+      <a
+        href="/"
+        class="block p-4 border rounded-lg hover:bg-gray-50"
+      >
+        <p class="font-medium text-gray-900">Explore Ventures</p>
+        <p class="text-gray-600 text-sm mt-1">See what others are building.</p>
+      </a>
+
+    </div>
+
+  </section>
+
+</div>

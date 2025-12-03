@@ -86,7 +86,8 @@ export const actions = {
     }
 
     // Redirect to the new venture page
-    throw redirect(303, `/ventures/${slug}`);
+    throw redirect(303, `/ventures/${slug}/dashboard`);
+
   }
 };
 ;null as any as Actions;

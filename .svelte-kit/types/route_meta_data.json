@@ -19,11 +19,14 @@
 		"src/routes/+layout.server.ts"
 	],
 	"/dashboard": [
-		"src/routes/dashboard/+page.server.ts",
-		"src/routes/+layout.server.ts",
 		"src/routes/+layout.server.ts"
 	],
 	"/mobile-must-signin": [
+		"src/routes/+layout.server.ts"
+	],
+	"/profile/[id]": [
+		"src/routes/profile/[id]/+page.server.ts",
+		"src/routes/+layout.server.ts",
 		"src/routes/+layout.server.ts"
 	],
 	"/ventures/new": [
@@ -33,71 +36,42 @@
 		"src/routes/ventures/new/+layout.server.ts",
 		"src/routes/+layout.server.ts"
 	],
-	"/ventures/[slug]": [
-		"src/routes/ventures/[slug]/+page.server.ts",
-		"src/routes/ventures/[slug]/+layout.server.ts",
+	"/ventures/[slug]/(public)": [
+		"src/routes/ventures/[slug]/(public)/+page.server.ts",
+		"src/routes/ventures/[slug]/(public)/+layout.server.ts",
 		"src/routes/+layout.server.ts",
-		"src/routes/ventures/[slug]/+layout.server.ts",
+		"src/routes/ventures/[slug]/(public)/+layout.server.ts",
 		"src/routes/+layout.server.ts"
 	],
-	"/ventures/[slug]/ideas": [
-		"src/routes/ventures/[slug]/ideas/+page.server.ts",
-		"src/routes/ventures/[slug]/+layout.server.ts",
+	"/ventures/[slug]/(public)/ideas": [
+		"src/routes/ventures/[slug]/(public)/ideas/+page.server.ts",
+		"src/routes/ventures/[slug]/(public)/+layout.server.ts",
 		"src/routes/+layout.server.ts"
 	],
 	"/ventures/[slug]/owner": [
 		"src/routes/ventures/[slug]/owner/+layout.server.ts",
-		"src/routes/ventures/[slug]/+layout.server.ts",
-		"src/routes/+layout.server.ts"
-	],
-	"/ventures/[slug]/owner/dashboard": [
+		"src/routes/+layout.server.ts",
 		"src/routes/ventures/[slug]/owner/+layout.server.ts",
-		"src/routes/ventures/[slug]/+layout.server.ts",
 		"src/routes/+layout.server.ts"
 	],
-	"/ventures/[slug]/owner/ideas": [
-		"src/routes/ventures/[slug]/owner/+layout.server.ts",
-		"src/routes/ventures/[slug]/+layout.server.ts",
+	"/ventures/[slug]/(public)/progress": [
+		"src/routes/ventures/[slug]/(public)/progress/+page.server.ts",
+		"src/routes/ventures/[slug]/(public)/+layout.server.ts",
 		"src/routes/+layout.server.ts"
 	],
-	"/ventures/[slug]/owner/progress": [
-		"src/routes/ventures/[slug]/owner/+layout.server.ts",
-		"src/routes/ventures/[slug]/+layout.server.ts",
+	"/ventures/[slug]/(public)/sessions": [
+		"src/routes/ventures/[slug]/(public)/sessions/+page.server.ts",
+		"src/routes/ventures/[slug]/(public)/+layout.server.ts",
 		"src/routes/+layout.server.ts"
 	],
-	"/ventures/[slug]/owner/sessions": [
-		"src/routes/ventures/[slug]/owner/+layout.server.ts",
-		"src/routes/ventures/[slug]/+layout.server.ts",
+	"/ventures/[slug]/(public)/tasks": [
+		"src/routes/ventures/[slug]/(public)/tasks/+page.server.ts",
+		"src/routes/ventures/[slug]/(public)/+layout.server.ts",
 		"src/routes/+layout.server.ts"
 	],
-	"/ventures/[slug]/owner/tasks": [
-		"src/routes/ventures/[slug]/owner/+layout.server.ts",
-		"src/routes/ventures/[slug]/+layout.server.ts",
-		"src/routes/+layout.server.ts"
-	],
-	"/ventures/[slug]/owner/team": [
-		"src/routes/ventures/[slug]/owner/+layout.server.ts",
-		"src/routes/ventures/[slug]/+layout.server.ts",
-		"src/routes/+layout.server.ts"
-	],
-	"/ventures/[slug]/progress": [
-		"src/routes/ventures/[slug]/progress/+page.server.ts",
-		"src/routes/ventures/[slug]/+layout.server.ts",
-		"src/routes/+layout.server.ts"
-	],
-	"/ventures/[slug]/sessions": [
-		"src/routes/ventures/[slug]/sessions/+page.server.ts",
-		"src/routes/ventures/[slug]/+layout.server.ts",
-		"src/routes/+layout.server.ts"
-	],
-	"/ventures/[slug]/tasks": [
-		"src/routes/ventures/[slug]/tasks/+page.server.ts",
-		"src/routes/ventures/[slug]/+layout.server.ts",
-		"src/routes/+layout.server.ts"
-	],
-	"/ventures/[slug]/team": [
-		"src/routes/ventures/[slug]/team/+page.server.ts",
-		"src/routes/ventures/[slug]/+layout.server.ts",
+	"/ventures/[slug]/(public)/team": [
+		"src/routes/ventures/[slug]/(public)/team/+page.server.ts",
+		"src/routes/ventures/[slug]/(public)/+layout.server.ts",
 		"src/routes/+layout.server.ts"
 	]
 }

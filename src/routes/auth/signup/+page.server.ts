@@ -15,18 +15,17 @@ export const actions: Actions = {
     const first_name = formData.get('first_name') as string;
     const last_name = formData.get('last_name') as string;
     const state = formData.get('state') as string;
-    const role = formData.get('role') as string;
-    const avatar = formData.get('avatar') as File | null;
 
-    if (!email || !password || !first_name || !last_name) {
+    if (!email || !password || !first_name || !last_name || !state) {
       return fail(400, { error: 'Missing required fields' });
     }
 
     // 1. Create user in Supabase Auth
-    const { data: authData, error: authError } = await locals.supabase.auth.signUp({
-      email,
-      password
-    });
+    const { data: authData, error: authError } =
+      await locals.supabase.auth.signUp({
+        email,
+        password
+      });
 
     if (authError) {
       console.error(authError);
@@ -40,7 +39,7 @@ export const actions: Actions = {
       return fail(500, { error: 'User not created' });
     }
 
-    // ✅ Important: if email confirmations are disabled, we get a session now
+    // If email confirmations are disabled, a session exists
     if (session) {
       await locals.supabase.auth.setSession({
         access_token: session.access_token,
@@ -48,36 +47,13 @@ export const actions: Actions = {
       });
     }
 
-    let avatar_url: string | null = null;
-
-    // 2. If avatar uploaded, put it in storage
-    if (avatar && avatar.size > 0) {
-      const fileExt = avatar.name.split('.').pop();
-      const filePath = `${user.id}/avatar.${fileExt}`;
-
-      const { error: uploadError } = await locals.supabase.storage
-        .from('avatars')
-        .upload(filePath, avatar, { upsert: true });
-
-      if (uploadError) {
-        console.error('Avatar upload error:', uploadError.message);
-      } else {
-        const { data: publicUrl } = locals.supabase.storage
-          .from('avatars')
-          .getPublicUrl(filePath);
-        avatar_url = publicUrl.publicUrl;
-      }
-    }
-
-    // 3. Update the profile row (trigger already inserted it)
+    // 2. Update the profile row (trigger created base row)
     const { error: profileError } = await locals.supabase
       .from('profiles')
       .update({
         first_name,
         last_name,
-        state,
-        role,
-        avatar_url
+        state
       })
       .eq('id', user.id);
 
@@ -86,7 +62,7 @@ export const actions: Actions = {
       return fail(500, { error: profileError.message });
     }
 
-    // 4. Redirect to homepage or dashboard
+    // 3. Redirect user after signup
     throw redirect(303, '/');
   }
 };
