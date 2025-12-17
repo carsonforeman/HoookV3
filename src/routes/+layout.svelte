@@ -3,30 +3,29 @@
   import { page } from "$app/stores";
 
   import GlobalNav from "$lib/components/GlobalNav.svelte";
+  import Footer from "$lib/components/Footer.svelte";
 
   export let data: { user: any; profile: any };
 </script>
 
-<div class="flex min-h-screen">
+{#if !$page.url.pathname.startsWith("/auth")}
 
-  {#if !$page.url.pathname.startsWith("/auth")}
+  <!-- GLOBAL HEADER -->
+  <GlobalNav />
 
-    <!-- GLOBAL NAV -->
-    <GlobalNav {data} />
+  <!-- MAIN CONTENT -->
+  <main class="min-h-screen">
+    <slot />
+  </main>
 
-    <!-- Shift content by 10rem so collapsed sidebar never overlaps -->
-    <main
-      class="flex-1 min-h-screen pb-20 md:pb-0 md:ml-[10rem]"
-    >
-      <slot />
-    </main>
+  <!-- FOOTER -->
+  <Footer />
 
-  {:else}
+{:else}
 
-    <!-- AUTH PAGES -->
-    <main class="flex-1 min-h-screen">
-      <slot />
-    </main>
+  <!-- AUTH PAGES (no nav, no footer) -->
+  <main class="min-h-screen">
+    <slot />
+  </main>
 
-  {/if}
-</div>
+{/if}

@@ -31,9 +31,6 @@
 	],
 	"/ventures/new": [
 		"src/routes/ventures/new/+page.server.ts",
-		"src/routes/ventures/new/+layout.server.ts",
-		"src/routes/+layout.server.ts",
-		"src/routes/ventures/new/+layout.server.ts",
 		"src/routes/+layout.server.ts"
 	],
 	"/ventures/[slug]/(public)": [
