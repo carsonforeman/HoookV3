@@ -20,7 +20,7 @@ export const actions: Actions = {
       return fail(400, { error: 'Missing required fields' });
     }
 
-    // 1. Create user in Supabase Auth
+    // 1️⃣ Create user in Supabase Auth
     const { data: authData, error: authError } =
       await locals.supabase.auth.signUp({
         email,
@@ -28,7 +28,7 @@ export const actions: Actions = {
       });
 
     if (authError) {
-      console.error(authError);
+      console.error('Auth signup error:', authError.message);
       return fail(400, { error: authError.message });
     }
 
@@ -39,7 +39,7 @@ export const actions: Actions = {
       return fail(500, { error: 'User not created' });
     }
 
-    // If email confirmations are disabled, a session exists
+    // 2️⃣ If email confirmation is disabled, set session
     if (session) {
       await locals.supabase.auth.setSession({
         access_token: session.access_token,
@@ -47,13 +47,22 @@ export const actions: Actions = {
       });
     }
 
-    // 2. Update the profile row (trigger created base row)
+    // 3️⃣ Generate username (required because NOT NULL)
+    const baseUsername =
+      `${first_name}-${last_name}`
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '');
+
+    const username = `${baseUsername}-${user.id.slice(0, 6)}`;
+
+    // 4️⃣ Update profile row
     const { error: profileError } = await locals.supabase
       .from('profiles')
       .update({
         first_name,
         last_name,
-        state
+        state,
+        username
       })
       .eq('id', user.id);
 
@@ -62,7 +71,7 @@ export const actions: Actions = {
       return fail(500, { error: profileError.message });
     }
 
-    // 3. Redirect user after signup
+    // 5️⃣ Redirect after successful signup
     throw redirect(303, '/');
   }
 };

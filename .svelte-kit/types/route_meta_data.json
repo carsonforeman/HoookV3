@@ -24,9 +24,13 @@
 	"/mobile-must-signin": [
 		"src/routes/+layout.server.ts"
 	],
-	"/profile/[id]": [
-		"src/routes/profile/[id]/+page.server.ts",
+	"/profile": [
+		"src/routes/profile/+page.server.ts",
 		"src/routes/+layout.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/u/[username]": [
+		"src/routes/u/[username]/+page.server.ts",
 		"src/routes/+layout.server.ts"
 	],
 	"/ventures/new": [

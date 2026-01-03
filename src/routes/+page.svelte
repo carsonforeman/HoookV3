@@ -18,7 +18,7 @@
       HO<span class="lowercase">o</span>OK
     </h1>
     <p class="mt-3 text-gray-500 text-sm">
-      Discover what people are building
+      Explore ventures looking for help
     </p>
   </div>
 

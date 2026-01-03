@@ -1,10 +1,30 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import { page } from "$app/stores";
-  import { Plus, User } from "lucide-svelte";
+  import { Plus, User, LogOut } from "lucide-svelte";
+  import { supabase } from "$lib/supabaseClient";
 
   $: user = $page.data?.user ?? null;
   $: profile = $page.data?.profile ?? null;
+
+  let showMenu = false;
+
+  const goHome = () => {
+    showMenu = false;
+    goto("/");
+  };
+
+  const goToMyProfile = () => {
+  showMenu = false;
+  goto(`/u/${profile.username}`);
+};
+
+
+  const signOut = async () => {
+    showMenu = false;
+    await supabase.auth.signOut();
+    goto("/auth/login");
+  };
 </script>
 
 <header class="w-full bg-white border-b border-gray-200">
@@ -12,7 +32,7 @@
 
     <!-- Logo -->
     <button
-      on:click={() => goto("/")}
+      on:click={goHome}
       class="text-xl font-semibold tracking-tight text-blue-600 select-none"
     >
       HO<span class="lowercase">o</span>OK
@@ -33,28 +53,66 @@
           Create
         </button>
 
-        <!-- Profile -->
-        <button
-          on:click={() => goto(`/profile/${profile.id}`)}
-          class="flex items-center"
-        >
-          {#if profile?.avatar_url}
-            <img
-              src={profile.avatar_url}
-              class="w-8 h-8 rounded-full object-cover"
+        <!-- Avatar + Dropdown -->
+        <div class="relative">
+
+          <!-- Avatar button -->
+          <button
+            on:click={() => (showMenu = !showMenu)}
+            class="flex items-center focus:outline-none"
+          >
+            {#if profile?.avatar_url}
+              <img
+                src={profile.avatar_url}
+                alt="Profile avatar"
+                class="w-8 h-8 rounded-full object-cover"
+              />
+            {:else}
+              <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-semibold text-gray-700">
+                {user.email.charAt(0).toUpperCase()}
+              </div>
+            {/if}
+          </button>
+
+          {#if showMenu}
+            <!-- Click-away backdrop -->
+            <div
+              class="fixed inset-0 z-40"
+              on:click={() => (showMenu = false)}
             />
-          {:else}
-            <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-semibold text-gray-700">
-              {user.email.charAt(0).toUpperCase()}
+
+            <!-- Dropdown menu -->
+            <div
+              class="absolute right-0 mt-2 w-44 z-50
+                     rounded-xl border bg-white shadow-lg overflow-hidden"
+            >
+              <button
+                on:click={goToMyProfile}
+                class="w-full px-4 py-2 text-sm text-left hover:bg-gray-100"
+              >
+                My profile
+              </button>
+
+              <button
+                on:click={signOut}
+                class="w-full px-4 py-2 text-sm text-left
+                       text-red-600 hover:bg-gray-100
+                       flex items-center gap-2"
+              >
+                <LogOut class="w-4 h-4" />
+                Sign out
+              </button>
             </div>
           {/if}
-        </button>
+
+        </div>
 
       {:else}
         <!-- Sign in -->
         <button
           on:click={() => goto("/auth/login")}
-          class="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition"
+          class="flex items-center gap-2 text-sm font-medium
+                 text-gray-700 hover:text-blue-600 transition"
         >
           <User class="w-4 h-4" />
           Sign in

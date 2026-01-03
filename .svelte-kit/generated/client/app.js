@@ -20,7 +20,8 @@ export const nodes = [
 	() => import('./nodes/16'),
 	() => import('./nodes/17'),
 	() => import('./nodes/18'),
-	() => import('./nodes/19')
+	() => import('./nodes/19'),
+	() => import('./nodes/20')
 ];
 
 export const server_loads = [0,4,5];
@@ -31,15 +32,16 @@ export const dictionary = {
 		"/auth/signup": [~8,[2]],
 		"/dashboard": [9],
 		"/mobile-must-signin": [10],
-		"/profile/[id]": [~11,[3]],
-		"/ventures/new": [~12],
-		"/ventures/[slug]/(public)": [~13,[4]],
-		"/ventures/[slug]/(public)/ideas": [~14,[4]],
-		"/ventures/[slug]/owner": [19,[5]],
-		"/ventures/[slug]/(public)/progress": [~15,[4]],
-		"/ventures/[slug]/(public)/sessions": [~16,[4]],
-		"/ventures/[slug]/(public)/tasks": [~17,[4]],
-		"/ventures/[slug]/(public)/team": [~18,[4]]
+		"/profile": [~11,[3]],
+		"/u/[username]": [~12],
+		"/ventures/new": [~13],
+		"/ventures/[slug]/(public)": [~14,[4]],
+		"/ventures/[slug]/(public)/ideas": [~15,[4]],
+		"/ventures/[slug]/owner": [20,[5]],
+		"/ventures/[slug]/(public)/progress": [~16,[4]],
+		"/ventures/[slug]/(public)/sessions": [~17,[4]],
+		"/ventures/[slug]/(public)/tasks": [~18,[4]],
+		"/ventures/[slug]/(public)/team": [~19,[4]]
 	};
 
 export const hooks = {
