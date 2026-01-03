@@ -4,8 +4,11 @@
   import { Plus, User, LogOut } from "lucide-svelte";
   import { supabase } from "$lib/supabaseClient";
 
+  // AUTH USER (from root layout)
   $: user = $page.data?.user ?? null;
-  $: profile = $page.data?.profile ?? null;
+
+  // LOGGED-IN USER PROFILE ONLY (never page profile)
+  $: viewerProfile = $page.data?.viewerProfile ?? null;
 
   let showMenu = false;
 
@@ -15,10 +18,11 @@
   };
 
   const goToMyProfile = () => {
-  showMenu = false;
-  goto(`/u/${profile.username}`);
-};
-
+    showMenu = false;
+    if (viewerProfile?.username) {
+      goto(`/u/${viewerProfile.username}`);
+    }
+  };
 
   const signOut = async () => {
     showMenu = false;
@@ -61,15 +65,15 @@
             on:click={() => (showMenu = !showMenu)}
             class="flex items-center focus:outline-none"
           >
-            {#if profile?.avatar_url}
+            {#if viewerProfile?.avatar_url}
               <img
-                src={profile.avatar_url}
-                alt="Profile avatar"
+                src={viewerProfile.avatar_url}
+                alt="Your profile avatar"
                 class="w-8 h-8 rounded-full object-cover"
               />
             {:else}
               <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-semibold text-gray-700">
-                {user.email.charAt(0).toUpperCase()}
+                {user.email?.charAt(0).toUpperCase()}
               </div>
             {/if}
           </button>

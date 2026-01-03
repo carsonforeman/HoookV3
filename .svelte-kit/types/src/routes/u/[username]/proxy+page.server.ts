@@ -1,11 +1,14 @@
 // @ts-nocheck
-// src/routes/profile/[username]/+page.server.ts
-import type { PageServerLoad } from '../../profile/[username]/$types';
+import type { PageServerLoad, Actions } from './$types';
+import { fail } from '@sveltejs/kit';
 
 export const load = async ({ params, locals }: Parameters<PageServerLoad>[0]) => {
   const { username } = params;
+  const viewer = locals.user;
 
+  // -------------------------
   // Fetch public profile
+  // -------------------------
   const { data: profile, error: profileError } = await locals.supabase
     .from('profiles')
     .select(`
@@ -26,12 +29,17 @@ export const load = async ({ params, locals }: Parameters<PageServerLoad>[0]) =>
   if (profileError || !profile) {
     return {
       profile: null,
-      ventures: []
+      ventures: [],
+      followerCount: 0,
+      followingCount: 0,
+      isFollowing: false
     };
   }
 
-  // Fetch ventures for this user
-  const { data: ventures, error: venturesError } = await locals.supabase
+  // -------------------------
+  // Fetch ventures
+  // -------------------------
+  const { data: ventures } = await locals.supabase
     .from('ventures')
     .select(`
       id,
@@ -41,12 +49,91 @@ export const load = async ({ params, locals }: Parameters<PageServerLoad>[0]) =>
     `)
     .eq('owner_id', profile.id);
 
-  if (venturesError) {
-    console.error('Ventures fetch error:', venturesError.message);
+  // -------------------------
+  // Follower count
+  // -------------------------
+  const { count: followerCount } = await locals.supabase
+    .from('follows')
+    .select('*', { count: 'exact', head: true })
+    .eq('following_id', profile.id);
+
+  // -------------------------
+  // Following count
+  // -------------------------
+  const { count: followingCount } = await locals.supabase
+    .from('follows')
+    .select('*', { count: 'exact', head: true })
+    .eq('follower_id', profile.id);
+
+  // -------------------------
+  // Is viewer following this user?
+  // -------------------------
+  let isFollowing = false;
+
+  if (viewer && viewer.id !== profile.id) {
+    const { data } = await locals.supabase
+      .from('follows')
+      .select('follower_id')
+      .eq('follower_id', viewer.id)
+      .eq('following_id', profile.id)
+      .maybeSingle();
+
+    isFollowing = Boolean(data);
   }
 
   return {
     profile,
-    ventures: ventures ?? []
+    ventures: ventures ?? [],
+    followerCount: followerCount ?? 0,
+    followingCount: followingCount ?? 0,
+    isFollowing
   };
 };
+
+export const actions = {
+  follow: async ({ locals, request }: import('./$types').RequestEvent) => {
+    const user = locals.user;
+    if (!user) return fail(401);
+
+    const form = await request.formData();
+    const followingId = form.get('following_id') as string;
+
+    if (!followingId) return fail(400);
+
+    const { error } = await locals.supabase
+      .from('follows')
+      .insert({
+        follower_id: user.id,
+        following_id: followingId
+      });
+
+    if (error) {
+      return fail(400, { error: error.message });
+    }
+
+    return { success: true };
+  },
+
+  unfollow: async ({ locals, request }: import('./$types').RequestEvent) => {
+    const user = locals.user;
+    if (!user) return fail(401);
+
+    const form = await request.formData();
+    const followingId = form.get('following_id') as string;
+
+    if (!followingId) return fail(400);
+
+    const { error } = await locals.supabase
+      .from('follows')
+      .delete()
+      .eq('follower_id', user.id)
+      .eq('following_id', followingId);
+
+    if (error) {
+      return fail(400, { error: error.message });
+    }
+
+    return { success: true };
+  }
+};
+;null as any as Actions;

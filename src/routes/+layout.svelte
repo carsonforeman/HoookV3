@@ -5,7 +5,13 @@
   import GlobalNav from "$lib/components/GlobalNav.svelte";
   import Footer from "$lib/components/Footer.svelte";
 
-  export let data: { user: any; profile: any };
+  // IMPORTANT:
+  // - user + viewerProfile come from root +layout.server.ts
+  // - profile is PAGE-LEVEL ONLY and should NOT be declared here
+  export let data: {
+    user: any;
+    viewerProfile: any;
+  };
 </script>
 
 {#if !$page.url.pathname.startsWith("/auth")}

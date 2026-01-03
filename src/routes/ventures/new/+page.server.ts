@@ -1,91 +1,94 @@
-// src/routes/ventures/new/+page.server.ts
-import { fail, redirect } from '@sveltejs/kit';
-import type { Actions } from './$types';
+import { fail, redirect } from "@sveltejs/kit";
+import type { Actions } from "./$types";
 
 export const actions: Actions = {
   default: async ({ request, locals }) => {
+    console.log("🔥 CREATE VENTURE ACTION HIT");
+
     const form = await request.formData();
 
-    // Get authenticated user
-    const uid = locals.session?.user?.id ?? locals.user?.id;
-    if (!uid) {
+    // 1️⃣ Auth check
+    const user = locals.user;
+    if (!user) {
       return fail(401, { error: "Not authenticated" });
     }
 
-    // Extract required fields
+    // 2️⃣ Extract fields
     const name = (form.get("name") as string)?.trim();
-    const about = (form.get("about") as string)?.trim();
-    const stage = (form.get("stage") as string)?.trim();
-    const type = (form.get("type") as string)?.trim();
-    const location = (form.get("location") as string)?.trim();
     const slug = (form.get("slug") as string)?.trim();
+    const type = (form.get("type") as string)?.trim();
+    const stage = (form.get("stage") as string)?.trim();
+    const about = (form.get("about") as string)?.trim();
+    const location = (form.get("location") as string)?.trim();
 
-    // Seeking = multi-select checkboxes
-    const seeking = form.getAll("seeking") as string[];
+    console.log("FORM VALUES", {
+  name,
+  slug,
+  type,
+  stage,
+  about,
+  location
+});
 
-    // Validate required fields
-    if (!name || !about || !stage || !type || !location || !slug) {
-      return fail(400, { error: "All fields except logo are required." });
+
+    // 3️⃣ Validate required fields
+    if (!name || !slug || !type || !stage || !about || !location) {
+      return fail(400, { error: "Missing required fields." });
     }
 
-    if (!Array.isArray(seeking) || seeking.length === 0) {
-      return fail(400, { error: "Please select at least one seeking option." });
-    }
-
-    // Optional logo upload
+    // 4️⃣ Optional logo upload
     let logo_url: string | null = null;
     const logo = form.get("logo") as File | null;
 
     if (logo && logo.size > 0) {
       try {
-        const buf = Buffer.from(await logo.arrayBuffer());
+        const buffer = Buffer.from(await logo.arrayBuffer());
         const ext = logo.name.split(".").pop();
-        const path = `${slug}-${Date.now()}.${ext}`;
+        const filePath = `ventures/${slug}-${Date.now()}.${ext}`;
 
-        // Upload to Supabase storage
-        const { error: uploadErr } = await locals.supabase.storage
+        const { error: uploadError } = await locals.supabase.storage
           .from("venture-logos")
-          .upload(path, buf, {
+          .upload(filePath, buffer, {
             contentType: logo.type,
             upsert: true
           });
 
-        if (uploadErr) {
-          console.error("Logo upload failed:", uploadErr);
-          return fail(500, { error: "Logo upload failed." });
+        if (uploadError) {
+          console.error("Logo upload failed:", uploadError.message);
+          return fail(500, { error: "Failed to upload logo." });
         }
 
-        const { data: urlData } = locals.supabase.storage
+        const { data: publicUrl } = locals.supabase.storage
           .from("venture-logos")
-          .getPublicUrl(path);
+          .getPublicUrl(filePath);
 
-        logo_url = urlData.publicUrl;
+        logo_url = publicUrl.publicUrl;
       } catch (err) {
-        console.error("Unexpected logo error:", err);
+        console.error("Logo processing error:", err);
         return fail(500, { error: "Error processing logo file." });
       }
     }
 
-    // Insert venture into database
-    const { error: dbError } = await locals.supabase.from("ventures").insert({
-      uid,
-      name,
-      slug,
-      about,
-      stage,
-      type,
-      location,
-      seeking,
-      logo_url
-    });
+    // 5️⃣ Insert venture
+    const { error: insertError } = await locals.supabase
+      .from("ventures")
+      .insert({
+        owner_id: user.id,
+        name,
+        slug,
+        type,
+        stage,
+        about,
+        location,
+        logo_url
+      });
 
-    if (dbError) {
-      console.error("Venture insert failed:", dbError);
+    if (insertError) {
+      console.error("Venture insert failed:", insertError.message);
       return fail(500, { error: "Failed to create venture." });
     }
 
-    // Redirect to the new venture page
-    throw redirect(303, `/ventures/${slug}/dashboard`);
-
+    // 6️⃣ Redirect to venture page
+    throw redirect(303, `/ventures/${slug}`);
   }
 };

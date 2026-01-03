@@ -8,8 +8,12 @@
   const profile = data.profile;
   const ventures = data.ventures ?? [];
 
+  const followerCount = data.followerCount ?? 0;
+  const followingCount = data.followingCount ?? 0;
+  const isFollowing = data.isFollowing ?? false;
+
   $: user = $page.data?.user ?? null;
-  $: isOwner = user && user.id === profile.id;
+  $: isOwner = user && profile && user.id === profile.id;
 
   const initials = (name: string) =>
     name
@@ -19,9 +23,26 @@
       .slice(0, 2)
       .toUpperCase();
 
-  const possessiveName = profile.first_name
+  const possessiveName = profile?.first_name
     ? `${profile.first_name}${profile.first_name.endsWith("s") ? "'" : "'s"}`
     : "Their";
+
+  const stateMap: Record<string, string> = {
+    AL:"Alabama",AK:"Alaska",AZ:"Arizona",AR:"Arkansas",CA:"California",
+    CO:"Colorado",CT:"Connecticut",DE:"Delaware",FL:"Florida",GA:"Georgia",
+    HI:"Hawaii",ID:"Idaho",IL:"Illinois",IN:"Indiana",IA:"Iowa",KS:"Kansas",
+    KY:"Kentucky",LA:"Louisiana",ME:"Maine",MD:"Maryland",MA:"Massachusetts",
+    MI:"Michigan",MN:"Minnesota",MS:"Mississippi",MO:"Missouri",MT:"Montana",
+    NE:"Nebraska",NV:"Nevada",NH:"New Hampshire",NJ:"New Jersey",NM:"New Mexico",
+    NY:"New York",NC:"North Carolina",ND:"North Dakota",OH:"Ohio",OK:"Oklahoma",
+    OR:"Oregon",PA:"Pennsylvania",RI:"Rhode Island",SC:"South Carolina",
+    SD:"South Dakota",TN:"Tennessee",TX:"Texas",UT:"Utah",VT:"Vermont",
+    VA:"Virginia",WA:"Washington",WV:"West Virginia",WI:"Wisconsin",WY:"Wyoming"
+  };
+
+  $: displayState = profile?.state
+    ? stateMap[profile.state] || profile.state
+    : null;
 </script>
 
 {#if profile}
@@ -58,10 +79,11 @@
       </div>
 
       <!-- INFO -->
-      <div class="flex-1 relative space-y-4">
+      <div class="flex-1 relative space-y-5">
 
         <!-- ACTIONS -->
         <div class="hidden md:flex absolute top-0 right-0 gap-3">
+
           {#if isOwner}
             <a
               href="/profile"
@@ -70,24 +92,61 @@
             >
               Edit profile
             </a>
+
+          {:else if user}
+            <form method="POST">
+              <input type="hidden" name="following_id" value={profile.id} />
+
+              {#if isFollowing}
+                <button
+                  formaction="?/unfollow"
+                  class="px-5 py-2 rounded-xl border font-semibold hover:bg-gray-100"
+                >
+                  Following
+                </button>
+              {:else}
+                <button
+                  formaction="?/follow"
+                  class="px-5 py-2 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700"
+                >
+                  Follow
+                </button>
+              {/if}
+            </form>
+
           {:else}
-            <button
-              class="px-5 py-2 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700"
+            <a
+              href="/auth/login"
+              class="px-5 py-2 rounded-xl border font-semibold hover:bg-gray-100"
             >
-              Connect
-            </button>
+              Sign in to follow
+            </a>
           {/if}
+
         </div>
 
         <h1 class="text-4xl font-bold">
           {profile.first_name} {profile.last_name}
         </h1>
 
-        <!-- LOCATION -->
-        {#if profile.state}
-          <div class="flex items-center gap-2 text-gray-600">
-            <MapPin class="w-4 h-4" />
-            <span>{profile.state}, USA</span>
+        <!-- LOCATION + FOLLOW STATS -->
+        {#if displayState}
+          <div class="flex flex-wrap items-center gap-4 text-gray-700">
+
+            <div class="flex items-center gap-2">
+              <MapPin class="w-4 h-4 text-gray-500" />
+              <span>{displayState}, USA</span>
+            </div>
+
+            <div class="flex items-center gap-4 text-sm">
+              <span>
+                <strong>{followerCount}</strong> followers
+              </span>
+              <span>
+                <strong>{followingCount}</strong> following
+              </span>
+            </div>
+
           </div>
         {/if}
 
@@ -127,6 +186,7 @@
             </a>
           {/if}
         </div>
+
       </div>
     </section>
 
@@ -156,6 +216,7 @@
         </div>
       {/if}
     </section>
+
   </div>
 {:else}
   <div class="p-10 text-center text-gray-500">

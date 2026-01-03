@@ -1,6 +1,6 @@
 {
 	"/": [
-		"src/routes/+page.ts",
+		"src/routes/+page.server.ts",
 		"src/routes/+layout.server.ts",
 		"src/routes/+layout.server.ts"
 	],
