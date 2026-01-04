@@ -27,17 +27,15 @@ export {};
 
 declare module "$app/types" {
 	export interface AppTypes {
-		RouteId(): "/" | "/auth" | "/auth/login" | "/auth/logout" | "/auth/signup" | "/dashboard" | "/mobile-must-signin" | "/profile" | "/u" | "/u/[username]" | "/ventures" | "/ventures/new" | "/ventures/[slug]/(public)" | "/ventures/[slug]" | "/ventures/[slug]/(public)/ideas" | "/ventures/[slug]/owner" | "/ventures/[slug]/(public)/progress" | "/ventures/[slug]/(public)/sessions" | "/ventures/[slug]/(public)/tasks" | "/ventures/[slug]/(public)/team";
+		RouteId(): "/" | "/auth" | "/auth/login" | "/auth/logout" | "/auth/signup" | "/dashboard" | "/mobile-must-signin" | "/profile" | "/u" | "/u/[username]" | "/ventures" | "/ventures/new" | "/ventures/[slug]/(public)" | "/ventures/[slug]" | "/ventures/[slug]/owner" | "/ventures/[slug]/owner/artifacts" | "/ventures/[slug]/owner/artifacts/new" | "/ventures/[slug]/owner/team";
 		RouteParams(): {
 			"/u/[username]": { username: string };
 			"/ventures/[slug]/(public)": { slug: string };
 			"/ventures/[slug]": { slug: string };
-			"/ventures/[slug]/(public)/ideas": { slug: string };
 			"/ventures/[slug]/owner": { slug: string };
-			"/ventures/[slug]/(public)/progress": { slug: string };
-			"/ventures/[slug]/(public)/sessions": { slug: string };
-			"/ventures/[slug]/(public)/tasks": { slug: string };
-			"/ventures/[slug]/(public)/team": { slug: string }
+			"/ventures/[slug]/owner/artifacts": { slug: string };
+			"/ventures/[slug]/owner/artifacts/new": { slug: string };
+			"/ventures/[slug]/owner/team": { slug: string }
 		};
 		LayoutParams(): {
 			"/": { username?: string; slug?: string };
@@ -54,15 +52,13 @@ declare module "$app/types" {
 			"/ventures/new": Record<string, never>;
 			"/ventures/[slug]/(public)": { slug: string };
 			"/ventures/[slug]": { slug: string };
-			"/ventures/[slug]/(public)/ideas": { slug: string };
 			"/ventures/[slug]/owner": { slug: string };
-			"/ventures/[slug]/(public)/progress": { slug: string };
-			"/ventures/[slug]/(public)/sessions": { slug: string };
-			"/ventures/[slug]/(public)/tasks": { slug: string };
-			"/ventures/[slug]/(public)/team": { slug: string }
+			"/ventures/[slug]/owner/artifacts": { slug: string };
+			"/ventures/[slug]/owner/artifacts/new": { slug: string };
+			"/ventures/[slug]/owner/team": { slug: string }
 		};
-		Pathname(): "/" | "/auth" | "/auth/" | "/auth/login" | "/auth/login/" | "/auth/logout" | "/auth/logout/" | "/auth/signup" | "/auth/signup/" | "/dashboard" | "/dashboard/" | "/mobile-must-signin" | "/mobile-must-signin/" | "/profile" | "/profile/" | "/u" | "/u/" | `/u/${string}` & {} | `/u/${string}/` & {} | "/ventures" | "/ventures/" | "/ventures/new" | "/ventures/new/" | `/ventures/${string}` & {} | `/ventures/${string}/` & {} | `/ventures/${string}/ideas` & {} | `/ventures/${string}/ideas/` & {} | `/ventures/${string}/owner` & {} | `/ventures/${string}/owner/` & {} | `/ventures/${string}/progress` & {} | `/ventures/${string}/progress/` & {} | `/ventures/${string}/sessions` & {} | `/ventures/${string}/sessions/` & {} | `/ventures/${string}/tasks` & {} | `/ventures/${string}/tasks/` & {} | `/ventures/${string}/team` & {} | `/ventures/${string}/team/` & {};
+		Pathname(): "/" | "/auth" | "/auth/" | "/auth/login" | "/auth/login/" | "/auth/logout" | "/auth/logout/" | "/auth/signup" | "/auth/signup/" | "/dashboard" | "/dashboard/" | "/mobile-must-signin" | "/mobile-must-signin/" | "/profile" | "/profile/" | "/u" | "/u/" | `/u/${string}` & {} | `/u/${string}/` & {} | "/ventures" | "/ventures/" | "/ventures/new" | "/ventures/new/" | `/ventures/${string}` & {} | `/ventures/${string}/` & {} | `/ventures/${string}/owner` & {} | `/ventures/${string}/owner/` & {} | `/ventures/${string}/owner/artifacts` & {} | `/ventures/${string}/owner/artifacts/` & {} | `/ventures/${string}/owner/artifacts/new` & {} | `/ventures/${string}/owner/artifacts/new/` & {} | `/ventures/${string}/owner/team` & {} | `/ventures/${string}/owner/team/` & {};
 		ResolvedPathname(): `${"" | `/${string}`}${ReturnType<AppTypes['Pathname']>}`;
-		Asset(): "/images/auth_background.jpg" | "/images/default.png" | "/images/hoooklogo.png" | "/images/phone.png" | "/images/round_logo.png" | "/robots.txt" | string & {};
+		Asset(): "/images/auth_background.jpg" | "/images/default.png" | "/images/hoooklogo.png" | "/images/New_Venture_Hero.png" | "/images/phone.png" | "/images/round_logo.png" | "/robots.txt" | string & {};
 	}
 }

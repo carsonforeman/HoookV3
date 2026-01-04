@@ -1,22 +1,21 @@
-// /src/routes/ventures/[slug]/(owner)/+layout.server.ts
 import type { LayoutServerLoad } from "./$types";
 import { redirect } from "@sveltejs/kit";
 
 export const load: LayoutServerLoad = async ({ params, locals }) => {
   const { slug } = params;
 
-  // Fetch venture
-  const { data: venture } = await locals.supabase
+  const { data: venture, error } = await locals.supabase
     .from("ventures")
     .select("*")
     .eq("slug", slug)
     .single();
 
-  if (!venture) redirect(302, "/ventures");
+  if (error || !venture) {
+    throw redirect(302, "/ventures");
+  }
 
-  // Only owner can view
-  if (!locals.user || locals.user.id !== venture.uid) {
-    redirect(302, `/ventures/${slug}`);
+  if (!locals.user || locals.user.id !== venture.owner_id) {
+    throw redirect(302, `/ventures/${slug}`);
   }
 
   return { venture };

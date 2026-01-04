@@ -38,41 +38,25 @@
 		"src/routes/+layout.server.ts"
 	],
 	"/ventures/[slug]/(public)": [
-		"src/routes/ventures/[slug]/(public)/+page.server.ts",
 		"src/routes/ventures/[slug]/(public)/+layout.server.ts",
 		"src/routes/+layout.server.ts",
-		"src/routes/ventures/[slug]/(public)/+layout.server.ts",
-		"src/routes/+layout.server.ts"
-	],
-	"/ventures/[slug]/(public)/ideas": [
-		"src/routes/ventures/[slug]/(public)/ideas/+page.server.ts",
 		"src/routes/ventures/[slug]/(public)/+layout.server.ts",
 		"src/routes/+layout.server.ts"
 	],
 	"/ventures/[slug]/owner": [
+		"src/routes/ventures/[slug]/owner/+page.server.ts",
 		"src/routes/ventures/[slug]/owner/+layout.server.ts",
 		"src/routes/+layout.server.ts",
 		"src/routes/ventures/[slug]/owner/+layout.server.ts",
 		"src/routes/+layout.server.ts"
 	],
-	"/ventures/[slug]/(public)/progress": [
-		"src/routes/ventures/[slug]/(public)/progress/+page.server.ts",
-		"src/routes/ventures/[slug]/(public)/+layout.server.ts",
+	"/ventures/[slug]/owner/artifacts/new": [
+		"src/routes/ventures/[slug]/owner/artifacts/new/+page.server.ts",
+		"src/routes/ventures/[slug]/owner/+layout.server.ts",
 		"src/routes/+layout.server.ts"
 	],
-	"/ventures/[slug]/(public)/sessions": [
-		"src/routes/ventures/[slug]/(public)/sessions/+page.server.ts",
-		"src/routes/ventures/[slug]/(public)/+layout.server.ts",
-		"src/routes/+layout.server.ts"
-	],
-	"/ventures/[slug]/(public)/tasks": [
-		"src/routes/ventures/[slug]/(public)/tasks/+page.server.ts",
-		"src/routes/ventures/[slug]/(public)/+layout.server.ts",
-		"src/routes/+layout.server.ts"
-	],
-	"/ventures/[slug]/(public)/team": [
-		"src/routes/ventures/[slug]/(public)/team/+page.server.ts",
-		"src/routes/ventures/[slug]/(public)/+layout.server.ts",
+	"/ventures/[slug]/owner/team": [
+		"src/routes/ventures/[slug]/owner/+layout.server.ts",
 		"src/routes/+layout.server.ts"
 	]
 }

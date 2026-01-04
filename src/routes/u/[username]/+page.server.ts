@@ -39,14 +39,19 @@ export const load: PageServerLoad = async ({ params, locals }) => {
   // Fetch ventures
   // -------------------------
   const { data: ventures } = await locals.supabase
-    .from('ventures')
-    .select(`
-      id,
-      name,
-      slug,
-      about
-    `)
-    .eq('owner_id', profile.id);
+  .from('ventures')
+  .select(`
+    id,
+    name,
+    slug,
+    about,
+    logo_url,
+    type,
+    stage,
+    location
+  `)
+  .eq('owner_id', profile.id);
+
 
   // -------------------------
   // Follower count

@@ -1,7 +1,9 @@
 <script lang="ts">
   import { ArrowLeft, MapPin, Instagram, Linkedin } from "lucide-svelte";
   import { goto } from "$app/navigation";
+  import VentureCard from "$lib/components/VentureCard.svelte";
   import { page } from "$app/stores";
+
 
   export let data;
 
@@ -196,25 +198,18 @@
         {possessiveName} Ventures
       </h2>
 
-      {#if ventures.length === 0}
-        <p class="text-gray-500">
-          No ventures to show yet.
-        </p>
-      {:else}
-        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {#each ventures as v}
-            <a
-              href={`/ventures/${v.slug}`}
-              class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md block"
-            >
-              <h3 class="font-semibold text-lg">{v.name}</h3>
-              <p class="text-sm text-gray-600 mt-1 line-clamp-2">
-                {v.about || "No description provided."}
-              </p>
-            </a>
-          {/each}
-        </div>
-      {/if}
+     {#if ventures.length === 0}
+  <p class="text-gray-500">
+    No ventures to show yet.
+  </p>
+{:else}
+  <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    {#each ventures as venture}
+      <VentureCard {venture} />
+    {/each}
+  </div>
+{/if}
+
     </section>
 
   </div>

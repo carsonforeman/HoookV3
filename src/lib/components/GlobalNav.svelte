@@ -37,7 +37,7 @@
     <!-- Logo -->
     <button
       on:click={goHome}
-      class="text-xl font-semibold tracking-tight text-blue-600 select-none"
+      class="text-2xl font-semibold tracking-tight text-blue-600 select-none"
     >
       HO<span class="lowercase">o</span>OK
     </button>
@@ -48,14 +48,17 @@
       {#if user}
         <!-- Create -->
         <button
-          on:click={() => goto("/ventures/new")}
-          class="flex items-center gap-2 px-3 py-1.5
-                 rounded-md text-sm font-medium
-                 bg-blue-600 text-white hover:bg-blue-700 transition"
-        >
-          <Plus class="w-4 h-4" />
-          Create
-        </button>
+  on:click={() => goto("/ventures/new")}
+  class="flex items-center gap-1.5
+         px-3 py-1.5
+         rounded-md text-sm
+         text-gray-600 hover:text-gray-900
+         hover:bg-gray-100 transition"
+>
+  <Plus class="w-4 h-4" />
+  <span class="hidden sm:inline">New</span>
+</button>
+
 
         <!-- Avatar + Dropdown -->
         <div class="relative">
@@ -69,10 +72,10 @@
               <img
                 src={viewerProfile.avatar_url}
                 alt="Your profile avatar"
-                class="w-8 h-8 rounded-full object-cover"
+                class="w-10 h-10 rounded-full object-cover"
               />
             {:else}
-              <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-semibold text-gray-700">
+              <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-semibold text-gray-700">
                 {user.email?.charAt(0).toUpperCase()}
               </div>
             {/if}

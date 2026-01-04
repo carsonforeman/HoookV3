@@ -1,22 +1,52 @@
 <script lang="ts">
+  import { Globe, Instagram } from "lucide-svelte";
+
   export let data;
 
   const venture = data.venture;
   const user = data.user;
 
-  let showShareModal = false;
+  const isOwner = user && user.id === venture.owner_id;
 
-  const titleCase = (str: string) =>
-    str ? str.replace(/\b\w/g, (c) => c.toUpperCase()) : "";
+  let showShareModal = false;
+  let copied = false;
 
   const getInitials = (name: string) =>
     name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
 
-  const shareUrl = typeof window !== "undefined"
-    ? `${window.location.origin}/ventures/${venture.slug}`
-    : "";
+  const states: Record<string, string> = {
+    AL:"Alabama", AK:"Alaska", AZ:"Arizona", AR:"Arkansas", CA:"California",
+    CO:"Colorado", CT:"Connecticut", DE:"Delaware", FL:"Florida", GA:"Georgia",
+    HI:"Hawaii", ID:"Idaho", IL:"Illinois", IN:"Indiana", IA:"Iowa",
+    KS:"Kansas", KY:"Kentucky", LA:"Louisiana", ME:"Maine", MD:"Maryland",
+    MA:"Massachusetts", MI:"Michigan", MN:"Minnesota", MS:"Mississippi",
+    MO:"Missouri", MT:"Montana", NE:"Nebraska", NV:"Nevada", NH:"New Hampshire",
+    NJ:"New Jersey", NM:"New Mexico", NY:"New York", NC:"North Carolina",
+    ND:"North Dakota", OH:"Ohio", OK:"Oklahoma", OR:"Oregon", PA:"Pennsylvania",
+    RI:"Rhode Island", SC:"South Carolina", SD:"South Dakota", TN:"Tennessee",
+    TX:"Texas", UT:"Utah", VT:"Vermont", VA:"Virginia", WA:"Washington",
+    WV:"West Virginia", WI:"Wisconsin", WY:"Wyoming"
+  };
 
-  const copyShareUrl = () => navigator.clipboard.writeText(shareUrl);
+  const fullLocation =
+    venture.location && states[venture.location]
+      ? `${states[venture.location]}, USA`
+      : null;
+
+  const shareUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/ventures/${venture.slug}`
+      : "";
+
+  async function copyShareUrl() {
+    await navigator.clipboard.writeText(shareUrl);
+    copied = true;
+
+    setTimeout(() => {
+      copied = false;
+      showShareModal = false;
+    }, 900);
+  }
 </script>
 
 <!-- SHARE MODAL -->
@@ -30,123 +60,163 @@
       </div>
 
       <div class="flex justify-end gap-3">
-        <button on:click={() => (showShareModal = false)} class="px-4 py-2 rounded-lg border">
+        <button
+          on:click={() => (showShareModal = false)}
+          class="px-4 py-2 rounded-lg border"
+        >
           Close
         </button>
-        <button on:click={copyShareUrl} class="px-4 py-2 bg-blue-600 text-white rounded-lg">
-          Copy
+
+        <button
+          on:click={copyShareUrl}
+          class="px-4 py-2 rounded-lg text-white
+                 {copied ? 'bg-green-600' : 'bg-blue-600'}"
+        >
+          {copied ? "Copied!" : "Copy"}
         </button>
       </div>
     </div>
   </div>
 {/if}
 
-<!-- =============== -->
-<!--  HEADER AREA   -->
-<!-- =============== -->
-<div class="max-w-5xl mx-auto px-6 pt-10 pb-4 flex flex-col md:flex-row gap-6">
+<!-- HEADER -->
+<header class="p-6 border-b bg-white">
+  <div class="max-w-5xl mx-auto">
 
-  <!-- LOGO -->
-  <div class="flex-shrink-0">
-    {#if venture.logo_url}
-      <img
-        src={venture.logo_url}
-        alt="{venture.name} logo"
-        class="w-32 h-32 md:w-40 md:h-40 rounded-2xl object-cover bg-white shadow-sm border"
-      />
-    {:else}
-      <div
-        class="w-32 h-32 md:w-40 md:h-40 rounded-2xl bg-gray-200 flex items-center justify-center text-2xl font-bold"
-      >
-        {getInitials(venture.name)}
+    <!-- TOP ROW -->
+    <div class="flex items-start justify-between gap-6">
+
+      <!-- LEFT -->
+      <div class="flex items-start gap-6">
+        {#if venture.logo_url}
+          <img
+            src={venture.logo_url}
+            alt={venture.name}
+            class="w-32 h-32 rounded-xl object-cover border shadow-sm"
+          />
+        {:else}
+          <div class="w-32 h-32 rounded-xl bg-gray-200 flex items-center justify-center text-2xl font-bold">
+            {getInitials(venture.name)}
+          </div>
+        {/if}
+
+        <div class="flex-1 space-y-2">
+          <h1 class="text-3xl font-bold">{venture.name}</h1>
+
+          <p class="text-sm text-gray-600">
+            {venture.type}{fullLocation ? ` • ${fullLocation}` : ""}
+          </p>
+
+          {#if venture.about}
+            <p class="text-sm text-gray-700 max-w-2xl">
+              {venture.about}
+            </p>
+          {/if}
+
+          <!-- LINKS -->
+          <div class="flex items-center gap-4 pt-2 text-sm">
+
+            {#if venture.website_url}
+              <a
+                href={venture.website_url}
+                target="_blank"
+                class="flex items-center gap-1 text-blue-600 hover:underline"
+              >
+                <Globe class="w-4 h-4" />
+                {venture.website_url}
+              </a>
+            {/if}
+
+            {#if venture.instagram_url}
+              <a href={venture.instagram_url} target="_blank" aria-label="Instagram">
+                <Instagram class="w-5 h-5 text-pink-500 hover:scale-110 transition" />
+              </a>
+            {/if}
+
+            {#if venture.tiktok_url}
+              <a href={venture.tiktok_url} target="_blank" aria-label="TikTok">
+                <svg
+                  class="w-5 h-5 hover:scale-110 transition"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M21 8.1c-1.4 0-2.8-.4-4-1.2-1.1-.7-2-1.7-2.6-2.9v9.7c0 3.1-2.5 5.6-5.6 5.6s-5.6-2.5-5.6-5.6 2.5-5.6 5.6-5.6c.4 0 .8 0 1.2.1v2.8c-.4-.1-.8-.2-1.2-.2-1.4 0-2.6 1.2-2.6 2.6s1.2 2.6 2.6 2.6 2.6-1.2 2.6-2.6V3h2.8c.3 1.6 1.2 3 2.5 4 1 .8 2.3 1.3 3.7 1.4v2.7z"/>
+                </svg>
+              </a>
+            {/if}
+          </div>
+        </div>
       </div>
-    {/if}
-  </div>
 
-  <!-- VENTURE INFO -->
-  <div class="flex-1 relative">
+      <!-- RIGHT ACTIONS (DESKTOP) -->
+      <div class="hidden md:flex gap-3 items-start self-start shrink-0">
 
-    <!-- DESKTOP ACTIONS -->
-    <div class="hidden md:flex absolute top-0 right-0 gap-3">
-      <form method="post" action="?/connect">
-        <button class="px-5 py-2 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700">
-          Connect
+
+        {#if isOwner}
+          <a
+            href={`/ventures/${venture.slug}/owner`}
+            class="px-5 py-2 rounded-xl border font-semibold hover:bg-gray-100"
+          >
+            Venture Dashboard
+          </a>
+        {:else}
+          <button
+  on:click={() => {
+    if (!user) {
+      window.location.href = "/auth/login";
+    } else {
+      // later: client-side fetch to /api/track
+      console.log("Track venture");
+    }
+  }}
+  class="px-5 py-2 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700"
+>
+  Track Venture
+</button>
+
+        {/if}
+
+        <button
+          on:click={() => (showShareModal = true)}
+          class="px-4 py-2 rounded-xl border text-gray-700 hover:bg-gray-100"
+        >
+          Share
         </button>
-      </form>
+
+      </div>
+    </div>
+
+    <!-- MOBILE ACTIONS -->
+    <div class="md:hidden mt-6 flex flex-col gap-3">
+
+      {#if isOwner}
+        <a
+          href={`/ventures/${venture.slug}/owner`}
+          class="w-full py-2 rounded-xl border font-semibold text-center"
+        >
+          Venture Dashboard
+        </a>
+      {:else}
+        <form method="post" action="?/track">
+          <button class="w-full py-2 rounded-xl bg-blue-600 text-white font-semibold">
+            Track Venture
+          </button>
+        </form>
+      {/if}
 
       <button
         on:click={() => (showShareModal = true)}
-        class="px-4 py-2 rounded-xl border text-gray-700 hover:bg-gray-100"
+        class="w-full py-2 rounded-xl border text-gray-700"
       >
         Share
       </button>
-    </div>
 
-    <!-- NAME -->
-    <h1 class="text-3xl font-bold">{venture.name}</h1>
-
-    <!-- TYPE + LOCATION -->
-    <p class="text-blue-600 font-medium mt-1">{titleCase(venture.type)}</p>
-    <p class="text-gray-600 text-sm">{titleCase(venture.location)}</p>
-
-    <!-- DESCRIPTION -->
-    <p class="text-gray-800 mt-4 whitespace-pre-line leading-relaxed">
-      {venture.about}
-    </p>
-
-    <!-- MOBILE BUTTONS -->
-    <div class="md:hidden mt-5 flex gap-3">
-      <form method="post" action="?/connect" class="flex-1">
-        <button class="w-full py-2 rounded-xl bg-blue-600 text-white font-semibold">
-          Connect
-        </button>
-      </form>
-
-      <button
-        on:click={() => (showShareModal = true)}
-        class="px-4 py-2 rounded-xl border text-gray-700"
-      >
-        Share
-      </button>
-    </div>
-
-    <!-- LINKS -->
-    <div class="mt-6">
-      <h3 class="text-sm font-semibold text-gray-600 mb-2">Links</h3>
-
-      <div class="flex flex-wrap gap-3">
-        {#if venture.instagram}
-          <a href={venture.instagram} class="px-4 py-2 rounded-full bg-pink-100 text-pink-700 flex items-center gap-2 text-sm font-medium">
-            Instagram
-          </a>
-        {/if}
-
-        {#if venture.tiktok}
-          <a href={venture.tiktok} class="px-4 py-2 rounded-full bg-black text-white flex items-center gap-2 text-sm font-medium">
-            TikTok
-          </a>
-        {/if}
-
-        {#if venture.website}
-          <a href={venture.website} class="px-4 py-2 rounded-full bg-blue-100 text-blue-700 flex items-center gap-2 text-sm font-medium">
-            Website
-          </a>
-        {/if}
-
-        {#if venture.mvp_url}
-          <a href={venture.mvp_url} class="px-4 py-2 rounded-full bg-purple-100 text-purple-700 flex items-center gap-2 text-sm font-medium">
-            MVP
-          </a>
-        {/if}
-      </div>
     </div>
 
   </div>
-</div>
+</header>
 
-<!-- =============== -->
-<!--   CONTENT      -->
-<!-- =============== -->
-<div class="max-w-5xl mx-auto px-6 py-10">
+<!-- CONTENT -->
+<main class="max-w-5xl mx-auto px-6 py-10">
   <slot />
-</div>
+</main>

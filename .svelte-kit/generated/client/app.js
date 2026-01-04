@@ -18,10 +18,7 @@ export const nodes = [
 	() => import('./nodes/14'),
 	() => import('./nodes/15'),
 	() => import('./nodes/16'),
-	() => import('./nodes/17'),
-	() => import('./nodes/18'),
-	() => import('./nodes/19'),
-	() => import('./nodes/20')
+	() => import('./nodes/17')
 ];
 
 export const server_loads = [0,4,5];
@@ -35,13 +32,10 @@ export const dictionary = {
 		"/profile": [~11,[3]],
 		"/u/[username]": [~12],
 		"/ventures/new": [~13],
-		"/ventures/[slug]/(public)": [~14,[4]],
-		"/ventures/[slug]/(public)/ideas": [~15,[4]],
-		"/ventures/[slug]/owner": [20,[5]],
-		"/ventures/[slug]/(public)/progress": [~16,[4]],
-		"/ventures/[slug]/(public)/sessions": [~17,[4]],
-		"/ventures/[slug]/(public)/tasks": [~18,[4]],
-		"/ventures/[slug]/(public)/team": [~19,[4]]
+		"/ventures/[slug]/(public)": [14,[4]],
+		"/ventures/[slug]/owner": [~15,[5]],
+		"/ventures/[slug]/owner/artifacts/new": [~16,[5]],
+		"/ventures/[slug]/owner/team": [17,[5]]
 	};
 
 export const hooks = {
